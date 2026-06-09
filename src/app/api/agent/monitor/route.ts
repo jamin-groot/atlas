@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@supabase/supabase-js'
+import { fetchScoutedOpportunities, ScoutedOpportunity } from '@/lib/scout'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -13,15 +14,7 @@ const supabase = createClient(
 
 const APY_CHANGE_THRESHOLD = 0.4  // % — alert if APY shifts by this much
 
-interface ScoutOpportunity {
-  id: string
-  protocol: string
-  symbol: string
-  apy: number
-  risk: string
-  district: string
-  tvlUsd: number
-}
+type ScoutOpportunity = ScoutedOpportunity
 
 interface ApySnapshot {
   opportunity_id: string
@@ -46,11 +39,11 @@ interface ApyChange {
 
 // ── Fetch live opportunities ──────────────────────────────────────────────────
 async function fetchLiveOpportunities(): Promise<ScoutOpportunity[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-  const res = await fetch(`${baseUrl}/api/scout`, { cache: 'no-store' })
-  if (!res.ok) return []
-  const { opportunities } = await res.json()
-  return opportunities ?? []
+  try {
+    return await fetchScoutedOpportunities()
+  } catch {
+    return []
+  }
 }
 
 // ── Load last APY snapshots from Supabase ────────────────────────────────────
