@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { UserIsland } from '@/types/atlas'
 import { useMemoryProfile } from '@/hooks/useMemoryProfile'
+import { useAgentAlerts, AgentAlert } from '@/hooks/useAgentAlerts'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -20,6 +21,7 @@ interface Props {
   visible: boolean
   wallet?: string | null
   onAllocate?: (action: AllocateAction) => void
+  agentAlertCount?: number
 }
 
 const SUGGESTIONS = [
@@ -40,13 +42,14 @@ function stripAction(content: string): string {
   return content.replace(/\[ACTION:allocate:[^\]]+\]/g, '').trim()
 }
 
-export function NavigatorChat({ portfolio, visible, wallet, onAllocate }: Props) {
+export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props) {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [pendingAction, setPendingAction] = useState<AllocateAction | null>(null)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
   const [unread, setUnread] = useState(false)
+  const { alerts, unread: alertUnread, markRead, markAllRead } = useAgentAlerts(wallet ?? undefined)
   const [isDragging, setIsDragging] = useState(false)
   const [removingPolicy, setRemovingPolicy] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -190,6 +193,48 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate }: Props)
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3" style={{ minHeight: 0 }}>
               {messages.length === 0 ? (
                 <div className="space-y-3">
+                  {/* Proactive agent alerts */}
+                  {alerts.filter(a => !a.read).length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-mono text-[#34D186]/60 uppercase tracking-widest px-1">
+                        ⬡ Autonomous alerts — {alerts.filter(a => !a.read).length} new
+                      </p>
+                      {alerts.filter(a => !a.read).map((alert: AgentAlert) => (
+                        <div key={alert.id}
+                          className="rounded-xl border border-[#34D186]/30 bg-[#34D186]/6 px-3 py-2.5 relative"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#34D186] shadow-[0_0_6px_#34D186]" />
+                                <p className="text-[9px] font-mono text-[#34D186] uppercase tracking-wider">Navigator · Autonomous</p>
+                              </div>
+                              <p className="text-xs text-white/70 leading-relaxed">{alert.message}</p>
+                              {alert.apy_from !== null && alert.apy_to !== null && (
+                                <div className="flex items-center gap-2 mt-1.5">
+                                  <span className="text-[10px] font-mono text-white/30">{alert.apy_from.toFixed(2)}%</span>
+                                  <span className="text-[10px] text-white/20">→</span>
+                                  <span className={`text-[10px] font-mono ${alert.apy_to > alert.apy_from ? 'text-[#34D186]' : 'text-red-400'}`}>
+                                    {alert.apy_to.toFixed(2)}%
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => { markRead(alert.id); send(`Tell me more about the ${alert.opportunity_id} yield change and what I should do`) }}
+                              className="text-[9px] font-mono text-[#34D186]/60 hover:text-[#34D186] border border-[#34D186]/20 rounded-lg px-2 py-1 transition-colors flex-shrink-0"
+                            >
+                              Act →
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                      <button onClick={markAllRead} className="text-[9px] font-mono text-white/20 hover:text-white/40 transition-colors px-1">
+                        Mark all read
+                      </button>
+                    </div>
+                  )}
+
                   <div className="rounded-xl bg-[#34D186]/8 border border-[#34D186]/20 px-3 py-2.5">
                     <p className="text-[10px] font-mono text-[#34D186] uppercase tracking-wider mb-1">Atlas Navigator</p>
                     <p className="text-xs text-white/60 leading-relaxed">
@@ -310,10 +355,18 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate }: Props)
           background: open ? '#34D18610' : 'transparent',
         }}
       >
-        <div className="w-1.5 h-1.5 rounded-full bg-[#34D186] shadow-[0_0_6px_#34D186]" />
+        <motion.div
+          className="w-1.5 h-1.5 rounded-full bg-[#34D186] shadow-[0_0_6px_#34D186]"
+          animate={alertUnread > 0 ? { scale: [1, 1.4, 1], opacity: [1, 0.6, 1] } : {}}
+          transition={{ repeat: Infinity, duration: 1.8 }}
+        />
         Navigator
-        {unread && !open && (
-          <div className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#34D186]" />
+        {(unread || alertUnread > 0) && !open && (
+          <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[#34D186] flex items-center justify-center">
+            <span className="text-[8px] font-mono text-black font-bold leading-none">
+              {alertUnread > 0 ? alertUnread : '·'}
+            </span>
+          </div>
         )}
       </motion.button>
     </>

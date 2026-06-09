@@ -30,6 +30,7 @@ import { DISTRICTS } from '@/lib/districts'
 import { MarketingLanding } from '@/components/landing/MarketingLanding'
 import { AudioToggle } from '@/components/world/AudioToggle'
 import { useAmbientAudio } from '@/hooks/useAmbientAudio'
+import { useAgentAlerts } from '@/hooks/useAgentAlerts'
 import * as THREE from 'three'
 
 const AtlasWorldScene = dynamic(
@@ -87,6 +88,7 @@ export default function AtlasPage() {
   const { notifications, push: pushNotif, markRead, markAllRead, clear: clearNotifs } = useNotifications()
   const { connect, connectors, error: connectError } = useConnect()
   const { address, isConnected, chainId } = useAccount()
+  const { unread: agentAlertUnread } = useAgentAlerts(address)
   const isWrongNetwork = isConnected && chainId !== 5003 // 5003 = Mantle Sepolia
   const livePrices = useLivePrices()
   const walletPortfolio = useWalletPortfolio(address, livePrices)
@@ -336,6 +338,7 @@ export default function AtlasPage() {
               portfolio={portfolio}
               visible
               wallet={address}
+              agentAlertCount={agentAlertUnread}
               onAllocate={({ opportunityId, amount }) => {
                 const allOps = DISTRICTS.flatMap(d => d.opportunities)
                 const op = allOps.find(o => o.id === opportunityId)
