@@ -1,0 +1,12 @@
+{
+  "name": "Atlas — The Wealth Exploration Layer",
+  "short_name": "Atlas",
+  "description": "A 3D navigable world of DeFi opportunities on Mantle.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
