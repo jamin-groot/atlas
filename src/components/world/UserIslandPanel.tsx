@@ -7,6 +7,7 @@ import { UserIsland } from '@/types/atlas'
 import { DISTRICT_COLORS } from '@/lib/mockPortfolio'
 import { VAULT_ABI, VAULT_ADDRESSES, VAULT_DISTRICTS, MNT_USD } from '@/lib/vaults'
 import { mantleSepolia } from '@/lib/wagmi/config'
+import { getIslandTier, getTierProgress, getNextTierLabel } from '@/lib/islandTier'
 
 interface Props {
   portfolio: UserIsland
@@ -68,6 +69,10 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
   const monthlyIncome = portfolio.positions.reduce((s, p) => s + p.income, 0)
   const totalYieldEarned = portfolio.positions.reduce((s, p) => s + (p.yieldEarned ?? 0), 0)
 
+  const tier = getIslandTier(portfolio.totalValue)
+  const tierProgress = getTierProgress(portfolio.totalValue)
+  const nextTierLabel = getNextTierLabel(portfolio.totalValue)
+
   return (
     <AnimatePresence>
       {visible && (
@@ -92,6 +97,35 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
                 </p>
               </div>
               <button onClick={onClose} className="text-white/30 hover:text-white/60 text-xs font-mono transition-colors">✕</button>
+            </div>
+
+            {/* ── Island Tier badge ── */}
+            <div className="rounded-xl p-3 border" style={{ borderColor: tier.color + '33', background: tier.color + '0d' }}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full border"
+                    style={{ borderColor: tier.color + '66', color: tier.color, background: tier.color + '18' }}>
+                    {tier.label}
+                  </span>
+                  <span className="text-sm font-light text-white">{tier.name}</span>
+                </div>
+                <span className="text-[10px] font-mono" style={{ color: tier.color }}>
+                  Tier {tier.tier}/5
+                </span>
+              </div>
+              {/* Progress bar to next tier */}
+              <div className="h-1 bg-white/8 rounded-full overflow-hidden mb-1.5">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${tierProgress * 100}%` }}
+                  transition={{ delay: 0.4, duration: 1.0, ease: 'easeOut' }}
+                  className="h-full rounded-full"
+                  style={{ background: `linear-gradient(90deg, ${tier.color}99, ${tier.color})` }}
+                />
+              </div>
+              <p className="text-[10px] font-mono text-white/35">
+                {nextTierLabel ? `${nextTierLabel}` : '🏆 Maximum tier reached — eligible to tokenize'}
+              </p>
             </div>
 
             {/* Health */}
