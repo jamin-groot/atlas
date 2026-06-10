@@ -28,6 +28,7 @@ import { usePortfolioHistory } from '@/hooks/usePortfolioHistory'
 import { MOCK_PORTFOLIO } from '@/lib/mockPortfolio'
 import { DISTRICTS } from '@/lib/districts'
 import { MarketingLanding } from '@/components/landing/MarketingLanding'
+import { DemoOnboardingModal } from '@/components/demo/DemoOnboardingModal'
 import { AtlasLogo } from '@/components/AtlasLogo'
 import { AudioToggle } from '@/components/world/AudioToggle'
 import { useAmbientAudio } from '@/hooks/useAmbientAudio'
@@ -66,6 +67,8 @@ export default function AtlasPage() {
   const [activeRoute, setActiveRoute] = useState<AtlasRoute | null>(null)
   const [showRoutes, setShowRoutes] = useState(false)
   const [navigatorCtx, setNavigatorCtx] = useState<NavigatorContext | null>(null)
+  const [isDemoMode, setIsDemoMode] = useState(false)
+  const [showDemoOnboarding, setShowDemoOnboarding] = useState(false)
 
   const setNav = useCallback((event: string) => {
     setNavigatorCtx(prev => ({
@@ -144,16 +147,18 @@ export default function AtlasPage() {
   }, [isConnected, address, phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep portfolio in sync with live on-chain data (polls every 5s via hook)
-  // Always overwrite with real data — even if mock was set during scan
+  // Real wallet data always takes priority — this also exits demo mode automatically
   useEffect(() => {
     if (walletPortfolio) {
       setPortfolio(walletPortfolio)
+      setIsDemoMode(false)          // real wallet connected — no longer demo
+      setShowDemoOnboarding(false)
     }
   }, [walletPortfolio]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset all state when wallet disconnects
   useEffect(() => {
-    if (!isConnected && portfolio) {
+    if (!isConnected && portfolio && !isDemoMode) {
       setPortfolio(null)
       setPhase('landing')
       setActiveDistrict(null)
@@ -166,6 +171,7 @@ export default function AtlasPage() {
       setShowRoutes(false)
       setActiveRoute(null)
       setAllocationHistory([])
+      setIsDemoMode(false)
     }
   }, [isConnected]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -197,9 +203,12 @@ export default function AtlasPage() {
     history.pushState({ phase: 'island' }, '')
     setPhase('island')
     setPortfolio(MOCK_PORTFOLIO)
+    setIsDemoMode(true)
     const routes = generateRoutes(MOCK_PORTFOLIO, liveAPY)
     if (routes[0]) { setActiveRoute(routes[0]); setShowRoutes(true) }
     setNav('Demo mode — exploring Atlas with a sample portfolio. Connect your wallet to load real data.')
+    // Show the feature onboarding popup after a short delay so the world loads first
+    setTimeout(() => setShowDemoOnboarding(true), 1200)
   }, [liveAPY])
 
   const handleConnectWallet = useCallback(() => {
@@ -438,6 +447,13 @@ export default function AtlasPage() {
       <AnimatePresence>
         {phase === 'landing' && (
           <MarketingLanding onEnter={handleExplore} onDemo={handleDemoMode} />
+        )}
+      </AnimatePresence>
+
+      {/* Demo onboarding popup — auto-shows when demo mode loads */}
+      <AnimatePresence>
+        {showDemoOnboarding && (
+          <DemoOnboardingModal onClose={() => setShowDemoOnboarding(false)} />
         )}
       </AnimatePresence>
 
