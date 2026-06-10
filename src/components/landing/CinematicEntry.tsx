@@ -253,7 +253,7 @@ export function CinematicEntry({ onComplete }: Props) {
       </motion.div>
 
       {/* Center — logo + messages */}
-      <div className="relative flex flex-col items-center gap-8">
+      <div className="relative flex flex-col items-center gap-8 w-full text-center">
 
         {/* Logo mark with draw animation */}
         <motion.div
@@ -299,7 +299,7 @@ export function CinematicEntry({ onComplete }: Props) {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.4 }}
             >
-              <div className="h-5 flex items-center">
+              <div className="h-5 flex items-center justify-center w-full">
                 <AnimatePresence mode="wait">
                   <motion.div key={msgIndex}
                     initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
