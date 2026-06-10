@@ -39,11 +39,20 @@ export function MarketingLanding({ onEnter, onDemo }: Props) {
             <span key={l} className="text-sm text-white/35 hover:text-white/70 transition-colors cursor-pointer">{l}</span>
           ))}
         </div>
-        <button onClick={() => setEntering(true)}
-          className="px-5 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:bg-white hover:text-black"
-          style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', background: 'transparent' }}>
-          Enter Atlas →
-        </button>
+        <div className="flex items-center gap-3">
+          {onDemo && (
+            <button onClick={onDemo}
+              className="px-4 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:border-white/40 hover:text-white/90"
+              style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.45)', background: 'transparent' }}>
+              Try Demo
+            </button>
+          )}
+          <button onClick={() => setEntering(true)}
+            className="px-5 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:bg-white hover:text-black"
+            style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', background: 'transparent' }}>
+            Enter Atlas →
+          </button>
+        </div>
       </nav>
 
       {/* ── HERO — 3D world fully visible behind ── */}
