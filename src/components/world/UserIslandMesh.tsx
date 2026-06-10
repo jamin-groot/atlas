@@ -111,7 +111,7 @@ export function UserIslandMesh({ portfolio, allocationCount, onClick }: Props) {
           const total = portfolio.allocation.length
           const angle = (i / total) * Math.PI * 2
           const c = new THREE.Color(DISTRICT_COLORS[alloc.district] ?? '#ffffff')
-          const h = Math.max(0.08, alloc.percentage / 20)
+          const h = Math.min(0.55, Math.max(0.08, alloc.percentage / 100 * 0.6))
           return (
             <group key={alloc.district} position={[Math.sin(angle) * 1.25, 0.32, Math.cos(angle) * 1.25]}>
               <mesh>
