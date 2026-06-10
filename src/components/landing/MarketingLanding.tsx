@@ -7,7 +7,7 @@ import { AtlasLogo } from '@/components/AtlasLogo'
 
 interface Props {
   onEnter: () => void
-  onDemo?: () => void
+  onDemo: () => void
 }
 
 
@@ -40,13 +40,11 @@ export function MarketingLanding({ onEnter, onDemo }: Props) {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          {onDemo && (
-            <button onClick={onDemo}
-              className="px-4 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:border-white/40 hover:text-white/90"
-              style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.45)', background: 'transparent' }}>
-              Try Demo
-            </button>
-          )}
+          <button onClick={onDemo}
+            className="px-4 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:border-white/40 hover:text-white/90"
+            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.45)', background: 'transparent' }}>
+            Try Demo
+          </button>
           <button onClick={() => setEntering(true)}
             className="px-5 py-2 rounded-full text-xs font-mono tracking-[0.15em] uppercase border transition-all duration-300 hover:bg-white hover:text-black"
             style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)', background: 'transparent' }}>
@@ -89,12 +87,10 @@ export function MarketingLanding({ onEnter, onDemo }: Props) {
               className="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-light bg-white text-black hover:bg-white/90 transition-all duration-200 tracking-wide">
               Enter Atlas
             </button>
-            {onDemo && (
-              <button onClick={onDemo}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-full text-sm font-light border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-all duration-200 tracking-wide">
-                Try Demo →
-              </button>
-            )}
+            <button onClick={onDemo}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-full text-sm font-light border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-all duration-200 tracking-wide">
+              Try Demo →
+            </button>
             <a href="#districts" className="text-sm text-white/35 hover:text-white/60 transition-colors font-light tracking-wide">
               Explore the world ↓
             </a>
