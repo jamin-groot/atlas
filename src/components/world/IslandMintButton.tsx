@@ -178,46 +178,76 @@ export function IslandMintButton({ portfolio, address }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm rounded-2xl"
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-2xl"
           >
             <motion.div
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#050d1a] border border-white/10 rounded-2xl p-6 mx-4 space-y-4 max-w-xs w-full"
+              initial={{ y: 16, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 8, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              className="mx-4 w-full max-w-sm rounded-3xl overflow-hidden"
+              style={{ background: 'rgba(10,18,35,0.97)', border: '1px solid rgba(255,255,255,0.08)' }}
             >
-              <div className="text-center space-y-1">
-                <span className="text-3xl">🏝</span>
-                <p className="text-white font-light text-lg">{tier.name} Island</p>
-                <p className="text-white/40 text-xs font-mono">This will be minted on Mantle Sepolia</p>
+              {/* Header */}
+              <div className="px-7 pt-7 pb-5">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="flex items-center gap-1.5 text-[11px] font-mono text-white/35 hover:text-white/60 transition-colors mb-5"
+                >
+                  ← BACK
+                </button>
+
+                {/* Label with dot */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#00C2FF] shadow-[0_0_6px_#00C2FF]" />
+                  <span className="text-[11px] font-mono tracking-[0.18em] uppercase" style={{ color: '#00C2FF' }}>
+                    {tier.name} Island NFT · Tier {tier.tier}
+                  </span>
+                </div>
+
+                <p className="text-white text-[22px] font-light leading-snug">
+                  Ready to tokenize your island?
+                </p>
               </div>
 
-              <div className="space-y-2 rounded-xl bg-white/5 p-3">
+              {/* TVL card */}
+              <div className="mx-7 mb-5 rounded-2xl px-5 py-4" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <p className="text-[10px] font-mono text-white/35 uppercase tracking-[0.15em] mb-1">TVL SNAPSHOT (USD)</p>
+                <p className="text-white text-[38px] font-light leading-none tracking-tight">
+                  ${portfolio.totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                </p>
+                <p className="text-white/25 text-[11px] font-mono mt-1.5">
+                  Stored permanently on Mantle Sepolia
+                </p>
+              </div>
+
+              {/* Stats row */}
+              <div className="mx-7 mb-6 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 {[
-                  ['Tier', `${tier.tier} — ${tier.name}`],
-                  ['TVL Snapshot', `$${portfolio.totalValue.toLocaleString(undefined, { maximumFractionDigits: 0 })}`],
-                  ['Buildings', `${unlockedCount} unlocked`],
-                  ['Health Score', `${portfolio.healthScore}/100`],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between text-[11px] font-mono">
-                    <span className="text-white/35">{label}</span>
-                    <span className="text-white/70">{value}</span>
+                  { label: 'BUILDINGS', value: `${unlockedCount} unlocked` },
+                  { label: 'HEALTH SCORE', value: `${portfolio.healthScore} / 100` },
+                  { label: 'TIER', value: `${tier.tier} — ${tier.name}` },
+                ].map(({ label, value }, i) => (
+                  <div
+                    key={label}
+                    className="flex items-center justify-between px-5 py-3"
+                    style={{ borderTop: i > 0 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+                  >
+                    <span className="text-[10px] font-mono text-white/35 uppercase tracking-[0.12em]">{label}</span>
+                    <span className="text-[13px] font-light text-white/80">{value}</span>
                   </div>
                 ))}
               </div>
 
-              <div className="flex gap-2">
-                <button onClick={() => setShowConfirm(false)}
-                  className="flex-1 py-2 rounded-xl text-xs font-mono text-white/40 border border-white/10 hover:border-white/20 transition-colors">
-                  Cancel
-                </button>
+              {/* CTA */}
+              <div className="px-7 pb-7">
                 <button
                   onClick={handleMint}
                   disabled={isPending || isConfirming}
-                  className="flex-1 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all disabled:opacity-40"
-                  style={{ background: tier.color + '33', border: `1px solid ${tier.color}55`, color: tier.color }}
+                  className="w-full py-4 rounded-2xl text-[13px] font-mono uppercase tracking-[0.18em] transition-all duration-200 disabled:opacity-40 hover:brightness-110"
+                  style={{ background: 'linear-gradient(135deg, #00C2FF, #007FFE)', color: '#fff' }}
                 >
-                  {isPending ? 'Sign…' : isConfirming ? 'Minting…' : 'Confirm Mint'}
+                  {isPending ? 'Sign in wallet…' : isConfirming ? 'Minting on Mantle…' : 'Mint Island NFT →'}
                 </button>
               </div>
             </motion.div>
