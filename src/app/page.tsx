@@ -190,6 +190,16 @@ export default function AtlasPage() {
     setNav('Welcome to Atlas. Wealth has never had a map. Explore where your capital can go.')
   }, [])
 
+  // Demo mode — loads mock island immediately, no wallet needed
+  const handleDemoMode = useCallback(() => {
+    history.pushState({ phase: 'island' }, '')
+    setPhase('island')
+    setPortfolio(MOCK_PORTFOLIO)
+    const routes = generateRoutes(MOCK_PORTFOLIO, liveAPY)
+    if (routes[0]) { setActiveRoute(routes[0]); setShowRoutes(true) }
+    setNav('Demo mode — exploring Atlas with a sample portfolio. Connect your wallet to load real data.')
+  }, [liveAPY])
+
   const handleConnectWallet = useCallback(() => {
     const connector = connectors.find(c => c.id === 'injected') ?? connectors[0]
     if (connector) {
@@ -224,8 +234,14 @@ export default function AtlasPage() {
                 setNav('Your island is ready. Explore the districts to find opportunities.')
               }
             } else {
-              // Real data still loading — continuous sync effect will update portfolio once ready
-              setNav('Your island is ready. Syncing on-chain data…')
+              // No real on-chain data — fall back to mock so the island always loads
+              setPortfolio(MOCK_PORTFOLIO)
+              const routes = generateRoutes(MOCK_PORTFOLIO, liveAPY)
+              if (routes[0]) {
+                setActiveRoute(routes[0])
+                setShowRoutes(true)
+              }
+              setNav('Your island is ready. Explore the districts to discover yield opportunities.')
             }
           }, 900)
         }
@@ -419,7 +435,7 @@ export default function AtlasPage() {
       {/* Landing — full marketing website */}
       <AnimatePresence>
         {phase === 'landing' && (
-          <MarketingLanding onEnter={handleExplore} />
+          <MarketingLanding onEnter={handleExplore} onDemo={handleDemoMode} />
         )}
       </AnimatePresence>
 

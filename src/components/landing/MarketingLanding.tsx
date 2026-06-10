@@ -7,12 +7,13 @@ import { AtlasLogo } from '@/components/AtlasLogo'
 
 interface Props {
   onEnter: () => void
+  onDemo?: () => void
 }
 
 
 const ATLAS_LOGO = (w = 88) => <AtlasLogo width={w} />
 
-export function MarketingLanding({ onEnter }: Props) {
+export function MarketingLanding({ onEnter, onDemo }: Props) {
   const [entering, setEntering] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -79,6 +80,12 @@ export function MarketingLanding({ onEnter }: Props) {
               className="w-full sm:w-auto px-8 py-3.5 rounded-full text-sm font-light bg-white text-black hover:bg-white/90 transition-all duration-200 tracking-wide">
               Enter Atlas
             </button>
+            {onDemo && (
+              <button onClick={onDemo}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-full text-sm font-light border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-all duration-200 tracking-wide">
+                Try Demo →
+              </button>
+            )}
             <a href="#districts" className="text-sm text-white/35 hover:text-white/60 transition-colors font-light tracking-wide">
               Explore the world ↓
             </a>
