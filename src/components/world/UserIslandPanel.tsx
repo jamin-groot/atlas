@@ -7,14 +7,10 @@ import { UserIsland } from '@/types/atlas'
 import { DISTRICT_COLORS } from '@/lib/mockPortfolio'
 import { VAULT_ABI, VAULT_ADDRESSES, VAULT_DISTRICTS, MNT_USD } from '@/lib/vaults'
 import { mantleSepolia } from '@/lib/wagmi/config'
-import { getIslandTier, getTierProgress, getNextTierLabel } from '@/lib/islandTier'
-import { getUnlockedMilestones, getLockedMilestones, MILESTONES } from '@/lib/islandMilestones'
-import { IslandMintButton } from './IslandMintButton'
 
 interface Props {
   portfolio: UserIsland
   visible: boolean
-  walletAddress?: `0x${string}`
   onClose: () => void
 }
 
@@ -31,7 +27,7 @@ const OP_PROTOCOLS: Record<string, string> = {
   usdy: 'Ondo Finance', musd: 'Mantle', meth: 'Mantle LSP',
 }
 
-type Tab = 'overview' | 'positions' | 'buildings'
+type Tab = 'overview' | 'positions'
 
 function WithdrawButton({ opportunityId, shares }: { opportunityId: string; shares: bigint }) {
   const vaultAddress = VAULT_ADDRESSES[opportunityId]
@@ -61,7 +57,7 @@ function WithdrawButton({ opportunityId, shares }: { opportunityId: string; shar
   )
 }
 
-export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: Props) {
+export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
   const [tab, setTab] = useState<Tab>('overview')
 
   const healthColor =
@@ -72,12 +68,6 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
   const monthlyIncome = portfolio.positions.reduce((s, p) => s + p.income, 0)
   const totalYieldEarned = portfolio.positions.reduce((s, p) => s + (p.yieldEarned ?? 0), 0)
 
-  const tier = getIslandTier(portfolio.totalValue)
-  const tierProgress = getTierProgress(portfolio.totalValue)
-  const nextTierLabel = getNextTierLabel(portfolio.totalValue)
-  const unlockedMilestones = getUnlockedMilestones(portfolio)
-  const lockedMilestones = getLockedMilestones(portfolio)
-
   return (
     <AnimatePresence>
       {visible && (
@@ -86,9 +76,9 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.4 }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-80 max-h-[90vh] flex flex-col"
+          className="absolute right-8 top-1/2 -translate-y-1/2 z-10 w-80"
         >
-          <div className="rounded-2xl border border-white/10 bg-black/70 backdrop-blur-xl p-6 space-y-4 overflow-y-auto flex-1" style={{ scrollbarWidth: 'none' }}>
+          <div className="rounded-2xl border border-white/10 bg-black/70 backdrop-blur-xl p-6 space-y-4">
 
             {/* Header */}
             <div className="flex items-start justify-between">
@@ -102,35 +92,6 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
                 </p>
               </div>
               <button onClick={onClose} className="text-white/30 hover:text-white/60 text-xs font-mono transition-colors">✕</button>
-            </div>
-
-            {/* ── Island Tier badge ── */}
-            <div className="rounded-xl p-3 border" style={{ borderColor: tier.color + '33', background: tier.color + '0d' }}>
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-mono px-2 py-0.5 rounded-full border"
-                    style={{ borderColor: tier.color + '66', color: tier.color, background: tier.color + '18' }}>
-                    {tier.label}
-                  </span>
-                  <span className="text-sm font-light text-white">{tier.name}</span>
-                </div>
-                <span className="text-[10px] font-mono" style={{ color: tier.color }}>
-                  Tier {tier.tier}/5
-                </span>
-              </div>
-              {/* Progress bar to next tier */}
-              <div className="h-1 bg-white/8 rounded-full overflow-hidden mb-1.5">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${tierProgress * 100}%` }}
-                  transition={{ delay: 0.4, duration: 1.0, ease: 'easeOut' }}
-                  className="h-full rounded-full"
-                  style={{ background: `linear-gradient(90deg, ${tier.color}99, ${tier.color})` }}
-                />
-              </div>
-              <p className="text-[10px] font-mono text-white/35">
-                {nextTierLabel ? `${nextTierLabel}` : '🏆 Maximum tier reached — eligible to tokenize'}
-              </p>
             </div>
 
             {/* Health */}
@@ -152,7 +113,7 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
 
             {/* Tabs */}
             <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
-              {(['overview', 'positions', 'buildings'] as Tab[]).map(t => (
+              {(['overview', 'positions'] as Tab[]).map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -162,11 +123,7 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
                     color: tab === t ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
                   }}
                 >
-                  {t === 'buildings'
-                    ? `🏛 ${unlockedMilestones.length}/${MILESTONES.length}`
-                    : t === 'positions' && portfolio.positions.length > 0
-                      ? `${t} (${portfolio.positions.length})`
-                      : t}
+                  {t} {t === 'positions' && portfolio.positions.length > 0 && `(${portfolio.positions.length})`}
                 </button>
               ))}
             </div>
@@ -322,60 +279,7 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
                 </motion.div>
               )}
 
-              {/* ── BUILDINGS TAB ── */}
-              {tab === 'buildings' && (
-                <motion.div key="buildings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
-                  <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest mb-3">
-                    Yield milestones unlock buildings on your island
-                  </p>
-
-                  {/* Unlocked */}
-                  {unlockedMilestones.map(m => (
-                    <div key={m.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 border"
-                      style={{ borderColor: m.color + '33', background: m.color + '0d' }}>
-                      <span className="text-sm mt-0.5">✦</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-light text-white">{m.name}</span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
-                            style={{ background: m.color + '28', color: m.color }}>BUILT</span>
-                        </div>
-                        <p className="text-[10px] font-mono text-white/35 leading-snug">{m.flavor}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* Locked */}
-                  {lockedMilestones.map(m => (
-                    <div key={m.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 border border-white/6 bg-white/[0.02] opacity-50">
-                      <span className="text-sm mt-0.5 text-white/20">○</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-light text-white/40">{m.name}</span>
-                          <span className="text-[9px] font-mono text-white/20 px-1.5 py-0.5 rounded-full border border-white/10">LOCKED</span>
-                        </div>
-                        <p className="text-[10px] font-mono text-white/25 leading-snug">{m.description}</p>
-                      </div>
-                    </div>
-                  ))}
-
-                  {unlockedMilestones.length === MILESTONES.length && (
-                    <div className="text-center py-4">
-                      <p className="text-xs font-mono" style={{ color: '#F97316' }}>
-                        🏆 All buildings unlocked — island ready to tokenize
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
-              )}
-
             </AnimatePresence>
-
-            {/* ── Island NFT Mint ── */}
-            <div className="pt-2 border-t border-white/6 relative">
-              <IslandMintButton portfolio={portfolio} address={walletAddress} />
-            </div>
-
           </div>
         </motion.div>
       )}
