@@ -9,10 +9,12 @@ import { VAULT_ABI, VAULT_ADDRESSES, VAULT_DISTRICTS, MNT_USD } from '@/lib/vaul
 import { mantleSepolia } from '@/lib/wagmi/config'
 import { getIslandTier, getTierProgress, getNextTierLabel } from '@/lib/islandTier'
 import { getUnlockedMilestones, getLockedMilestones, MILESTONES } from '@/lib/islandMilestones'
+import { IslandMintButton } from './IslandMintButton'
 
 interface Props {
   portfolio: UserIsland
   visible: boolean
+  walletAddress?: `0x${string}`
   onClose: () => void
 }
 
@@ -59,7 +61,7 @@ function WithdrawButton({ opportunityId, shares }: { opportunityId: string; shar
   )
 }
 
-export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
+export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: Props) {
   const [tab, setTab] = useState<Tab>('overview')
 
   const healthColor =
@@ -368,6 +370,12 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
               )}
 
             </AnimatePresence>
+
+            {/* ── Island NFT Mint ── */}
+            <div className="pt-2 border-t border-white/6 relative">
+              <IslandMintButton portfolio={portfolio} address={walletAddress} />
+            </div>
+
           </div>
         </motion.div>
       )}

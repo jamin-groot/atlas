@@ -629,6 +629,7 @@ export default function AtlasPage() {
           portfolio={portfolio}
           visible={islandPanelOpen}
           onClose={() => setIslandPanelOpen(false)}
+          walletAddress={address}
         />
       )}
 
