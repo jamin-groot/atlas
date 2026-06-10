@@ -7,6 +7,7 @@ import * as THREE from 'three'
 import { UserIsland } from '@/types/atlas'
 import { DISTRICT_COLORS } from '@/lib/mockPortfolio'
 import { getIslandTier } from '@/lib/islandTier'
+import { getUnlockedMilestones } from '@/lib/islandMilestones'
 
 interface Props {
   portfolio: UserIsland
@@ -32,6 +33,10 @@ export function UserIslandMesh({ portfolio, allocationCount, onClick }: Props) {
   const tier = useMemo(() => getIslandTier(portfolio.totalValue), [portfolio.totalValue])
   const tierColor = useMemo(() => new THREE.Color(tier.color), [tier.color])
   const s = tier.scale  // base scale for all geometry
+
+  // Yield-based milestone buildings
+  const milestones = useMemo(() => getUnlockedMilestones(portfolio), [portfolio])
+  const hasId = (id: string) => milestones.some(m => m.id === id)
 
   const extraCrystals = useMemo(() => {
     return portfolio.allocation
@@ -299,6 +304,141 @@ export function UserIslandMesh({ portfolio, allocationCount, onClick }: Props) {
           <ringGeometry args={[1.0 * s, 2.6 * s, 48]} />
           <meshBasicMaterial color={hColor} transparent opacity={0.025 + stage * 0.008} />
         </mesh>
+
+        {/* ── MILESTONE BUILDINGS ────────────────────────────────────────── */}
+
+        {/* Fountain — first_yield: central glowing pool */}
+        {hasId('first_yield') && (
+          <group position={[0, tier.layers >= 2 ? 0.32 : 0.22, 0]}>
+            <mesh>
+              <cylinderGeometry args={[0.18, 0.22, 0.06, 16]} />
+              <meshStandardMaterial color="#0d2a40" emissive="#34D186" emissiveIntensity={0.7} metalness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.1, 0]}>
+              <sphereGeometry args={[0.07, 10, 10]} />
+              <meshBasicMaterial color="#34D186" transparent opacity={0.9} />
+            </mesh>
+            {/* Water ripple ring */}
+            <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+              <ringGeometry args={[0.12, 0.22, 24]} />
+              <meshBasicMaterial color="#34D186" transparent opacity={0.25} />
+            </mesh>
+          </group>
+        )}
+
+        {/* Trading post — ten_earned: small market stall at island edge */}
+        {hasId('ten_earned') && (
+          <group position={[-1.0 * s, tier.layers >= 2 ? 0.32 : 0.22, 0.2 * s]}>
+            <mesh>
+              <boxGeometry args={[0.22, 0.18, 0.18]} />
+              <meshStandardMaterial color="#0d1e38" emissive="#3B82F6" emissiveIntensity={0.5} metalness={0.8} />
+            </mesh>
+            {/* Awning */}
+            <mesh position={[0, 0.13, 0]} rotation={[Math.PI / 12, 0, 0]}>
+              <boxGeometry args={[0.28, 0.03, 0.22]} />
+              <meshBasicMaterial color="#3B82F6" transparent opacity={0.75} />
+            </mesh>
+          </group>
+        )}
+
+        {/* Fortress walls — healthy: perimeter ring of low wall segments */}
+        {hasId('healthy') && [0, 1, 2, 3, 4, 5].map(i => {
+          const angle = (i / 6) * Math.PI * 2
+          const r = 1.5 * s
+          return (
+            <group key={i}
+              position={[Math.sin(angle) * r, tier.layers >= 2 ? 0.28 : 0.18, Math.cos(angle) * r]}
+              rotation={[0, -angle, 0]}>
+              <mesh>
+                <boxGeometry args={[0.38, 0.14, 0.08]} />
+                <meshStandardMaterial color="#1a2a50" emissive="#F59E0B"
+                  emissiveIntensity={0.45} metalness={0.9} roughness={0.2} />
+              </mesh>
+              {/* Battlement top */}
+              {[-.1, .1].map((ox, j) => (
+                <mesh key={j} position={[ox, 0.1, 0]}>
+                  <boxGeometry args={[0.1, 0.1, 0.09]} />
+                  <meshBasicMaterial color="#F59E0B" transparent opacity={0.6} />
+                </mesh>
+              ))}
+            </group>
+          )
+        })}
+
+        {/* Yield garden — hundred_earned: glowing plant clusters */}
+        {hasId('hundred_earned') && [0, 1, 2].map(i => {
+          const angle = (i / 3) * Math.PI * 2 + Math.PI / 6
+          const r = 0.6 * s
+          return (
+            <group key={i}
+              position={[Math.sin(angle) * r, tier.layers >= 2 ? 0.38 : 0.25, Math.cos(angle) * r]}>
+              {[0, 1, 2].map(j => (
+                <mesh key={j}
+                  position={[(j - 1) * 0.07, j * 0.06, (j % 2) * 0.05]}>
+                  <coneGeometry args={[0.03, 0.12 + j * 0.04, 5]} />
+                  <meshBasicMaterial color="#34D186" transparent opacity={0.8} />
+                </mesh>
+              ))}
+            </group>
+          )
+        })}
+
+        {/* Observatory dome — monthly_income ($50/mo) */}
+        {hasId('monthly_income') && (
+          <group position={[0.85 * s, tier.layers >= 3 ? 0.46 : 0.32, -0.6 * s]}>
+            <mesh>
+              <cylinderGeometry args={[0.13, 0.16, 0.1, 12]} />
+              <meshStandardMaterial color="#0a1628" emissive="#06B6D4" emissiveIntensity={0.5} metalness={0.9} />
+            </mesh>
+            <mesh position={[0, 0.1, 0]}>
+              <sphereGeometry args={[0.13, 12, 12, 0, Math.PI * 2, 0, Math.PI / 2]} />
+              <meshStandardMaterial color="#06B6D4" emissive="#06B6D4"
+                emissiveIntensity={0.7} transparent opacity={0.7} metalness={0.6} />
+            </mesh>
+            {/* Dome glow */}
+            <mesh position={[0, 0.1, 0]}>
+              <sphereGeometry args={[0.18, 10, 10, 0, Math.PI * 2, 0, Math.PI / 2]} />
+              <meshBasicMaterial color="#06B6D4" transparent opacity={0.1} />
+            </mesh>
+          </group>
+        )}
+
+        {/* Network hub — full_spread (3+ districts): central glowing ring tower */}
+        {hasId('full_spread') && (
+          <group position={[-0.7 * s, tier.layers >= 3 ? 0.46 : 0.32, 0.7 * s]}>
+            <mesh>
+              <cylinderGeometry args={[0.06, 0.1, 0.45, 8]} />
+              <meshStandardMaterial color="#EC4899" emissive="#EC4899" emissiveIntensity={0.8} metalness={0.95} />
+            </mesh>
+            <mesh position={[0, 0.25, 0]} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.16, 0.018, 6, 20]} />
+              <meshBasicMaterial color="#EC4899" transparent opacity={0.85} />
+            </mesh>
+          </group>
+        )}
+
+        {/* Atlas Temple — five_hundred_earned: grand columned structure */}
+        {hasId('five_hundred_earned') && (
+          <group position={[0.3 * s, tier.layers >= 3 ? 0.5 : 0.35, -1.0 * s]}>
+            {/* Temple base */}
+            <mesh position={[0, -0.04, 0]}>
+              <boxGeometry args={[0.38, 0.06, 0.28]} />
+              <meshStandardMaterial color="#1a1a40" emissive="#F97316" emissiveIntensity={0.35} metalness={0.9} />
+            </mesh>
+            {/* Columns */}
+            {[-0.12, 0.12].map((ox, i) => (
+              <mesh key={i} position={[ox, 0.12, 0]}>
+                <cylinderGeometry args={[0.025, 0.03, 0.3, 8]} />
+                <meshStandardMaterial color="#F97316" emissive="#F97316" emissiveIntensity={0.6} metalness={0.85} />
+              </mesh>
+            ))}
+            {/* Roof */}
+            <mesh position={[0, 0.3, 0]}>
+              <coneGeometry args={[0.2, 0.14, 4]} />
+              <meshBasicMaterial color="#F97316" transparent opacity={0.85} />
+            </mesh>
+          </group>
+        )}
 
       </group>
     </Float>

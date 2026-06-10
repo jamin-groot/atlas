@@ -8,6 +8,7 @@ import { DISTRICT_COLORS } from '@/lib/mockPortfolio'
 import { VAULT_ABI, VAULT_ADDRESSES, VAULT_DISTRICTS, MNT_USD } from '@/lib/vaults'
 import { mantleSepolia } from '@/lib/wagmi/config'
 import { getIslandTier, getTierProgress, getNextTierLabel } from '@/lib/islandTier'
+import { getUnlockedMilestones, getLockedMilestones, MILESTONES } from '@/lib/islandMilestones'
 
 interface Props {
   portfolio: UserIsland
@@ -28,7 +29,7 @@ const OP_PROTOCOLS: Record<string, string> = {
   usdy: 'Ondo Finance', musd: 'Mantle', meth: 'Mantle LSP',
 }
 
-type Tab = 'overview' | 'positions'
+type Tab = 'overview' | 'positions' | 'buildings'
 
 function WithdrawButton({ opportunityId, shares }: { opportunityId: string; shares: bigint }) {
   const vaultAddress = VAULT_ADDRESSES[opportunityId]
@@ -72,6 +73,8 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
   const tier = getIslandTier(portfolio.totalValue)
   const tierProgress = getTierProgress(portfolio.totalValue)
   const nextTierLabel = getNextTierLabel(portfolio.totalValue)
+  const unlockedMilestones = getUnlockedMilestones(portfolio)
+  const lockedMilestones = getLockedMilestones(portfolio)
 
   return (
     <AnimatePresence>
@@ -147,7 +150,7 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
 
             {/* Tabs */}
             <div className="flex gap-1 p-1 rounded-xl bg-white/5 border border-white/8">
-              {(['overview', 'positions'] as Tab[]).map(t => (
+              {(['overview', 'positions', 'buildings'] as Tab[]).map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -157,7 +160,11 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
                     color: tab === t ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)',
                   }}
                 >
-                  {t} {t === 'positions' && portfolio.positions.length > 0 && `(${portfolio.positions.length})`}
+                  {t === 'buildings'
+                    ? `🏛 ${unlockedMilestones.length}/${MILESTONES.length}`
+                    : t === 'positions' && portfolio.positions.length > 0
+                      ? `${t} (${portfolio.positions.length})`
+                      : t}
                 </button>
               ))}
             </div>
@@ -309,6 +316,53 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
                         </div>
                       )
                     })
+                  )}
+                </motion.div>
+              )}
+
+              {/* ── BUILDINGS TAB ── */}
+              {tab === 'buildings' && (
+                <motion.div key="buildings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+                  <p className="text-[10px] font-mono text-white/30 uppercase tracking-widest mb-3">
+                    Yield milestones unlock buildings on your island
+                  </p>
+
+                  {/* Unlocked */}
+                  {unlockedMilestones.map(m => (
+                    <div key={m.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 border"
+                      style={{ borderColor: m.color + '33', background: m.color + '0d' }}>
+                      <span className="text-sm mt-0.5">✦</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-xs font-light text-white">{m.name}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-full"
+                            style={{ background: m.color + '28', color: m.color }}>BUILT</span>
+                        </div>
+                        <p className="text-[10px] font-mono text-white/35 leading-snug">{m.flavor}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Locked */}
+                  {lockedMilestones.map(m => (
+                    <div key={m.id} className="flex items-start gap-3 rounded-xl px-3 py-2.5 border border-white/6 bg-white/[0.02] opacity-50">
+                      <span className="text-sm mt-0.5 text-white/20">○</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-xs font-light text-white/40">{m.name}</span>
+                          <span className="text-[9px] font-mono text-white/20 px-1.5 py-0.5 rounded-full border border-white/10">LOCKED</span>
+                        </div>
+                        <p className="text-[10px] font-mono text-white/25 leading-snug">{m.description}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {unlockedMilestones.length === MILESTONES.length && (
+                    <div className="text-center py-4">
+                      <p className="text-xs font-mono" style={{ color: '#F97316' }}>
+                        🏆 All buildings unlocked — island ready to tokenize
+                      </p>
+                    </div>
                   )}
                 </motion.div>
               )}
