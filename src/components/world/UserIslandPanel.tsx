@@ -86,9 +86,9 @@ export function UserIslandPanel({ portfolio, visible, onClose, walletAddress }: 
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.4 }}
-          className="absolute right-8 top-1/2 -translate-y-1/2 z-10 w-80"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-80 max-h-[90vh] flex flex-col"
         >
-          <div className="rounded-2xl border border-white/10 bg-black/70 backdrop-blur-xl p-6 space-y-4">
+          <div className="rounded-2xl border border-white/10 bg-black/70 backdrop-blur-xl p-6 space-y-4 overflow-y-auto flex-1" style={{ scrollbarWidth: 'none' }}>
 
             {/* Header */}
             <div className="flex items-start justify-between">
