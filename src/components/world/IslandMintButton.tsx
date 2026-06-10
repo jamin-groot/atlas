@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
 import { UserIsland } from '@/types/atlas'
@@ -171,14 +172,14 @@ export function IslandMintButton({ portfolio, address }: Props) {
         )}
       </div>
 
-      {/* Confirm modal */}
+      {/* Confirm modal — portalled to body so it covers the full screen */}
       <AnimatePresence>
-        {showConfirm && (
+        {showConfirm && typeof document !== 'undefined' && createPortal(
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md rounded-2xl"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-md"
           >
             <motion.div
               initial={{ y: 16, opacity: 0 }}
@@ -251,7 +252,8 @@ export function IslandMintButton({ portfolio, address }: Props) {
                 </button>
               </div>
             </motion.div>
-          </motion.div>
+          </motion.div>,
+          document.body
         )}
       </AnimatePresence>
     </>
