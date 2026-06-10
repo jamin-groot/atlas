@@ -134,12 +134,14 @@ export default function AtlasPage() {
 
   const { disconnect } = useDisconnect()
 
-  // When wallet connects, run the scan sequence
+  // When wallet connects, run the scan sequence — but only if the user
+  // has already left the landing page (i.e. they clicked "Enter Atlas").
+  // We never auto-skip the landing so the Try Demo button is always visible.
   useEffect(() => {
-    if (isConnected && address && !portfolio) {
+    if (isConnected && address && !portfolio && phase !== 'landing') {
       runScanSequence()
     }
-  }, [isConnected, address]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isConnected, address, phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep portfolio in sync with live on-chain data (polls every 5s via hook)
   // Always overwrite with real data — even if mock was set during scan
