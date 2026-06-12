@@ -126,8 +126,13 @@ export function AllocationFlow({ opportunity, amount: defaultAmount, portfolio, 
       setStep('error')
       return
     }
+    if (opportunity?.comingSoon) {
+      setTxError('This opportunity is coming soon and not yet available for allocation.')
+      setStep('error')
+      return
+    }
     if (!vaultAddress) {
-      setTxError('Vault contract not found for this opportunity.')
+      setTxError('No vault contract deployed for this opportunity yet. Try USDY or mETH instead.')
       setStep('error')
       return
     }

@@ -208,14 +208,16 @@ export function OpportunityView({ opportunity, portfolio, onBack, onSimulate, on
                         Simulate
                       </button>
                       <button
-                        onClick={onAllocate}
+                        onClick={opportunity?.comingSoon ? undefined : onAllocate}
+                        disabled={!!opportunity?.comingSoon}
                         className="flex-1 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition-all"
                         style={{
-                          backgroundColor: color,
-                          color: '#000',
+                          backgroundColor: opportunity?.comingSoon ? 'rgba(255,255,255,0.06)' : color,
+                          color: opportunity?.comingSoon ? 'rgba(255,255,255,0.25)' : '#000',
+                          cursor: opportunity?.comingSoon ? 'not-allowed' : 'pointer',
                         }}
                       >
-                        Allocate →
+                        {opportunity?.comingSoon ? 'Coming Soon' : 'Allocate →'}
                       </button>
                     </div>
 
