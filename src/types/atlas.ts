@@ -62,3 +62,13 @@ export interface RouteStep {
 }
 
 export type CameraLevel = 1 | 2 | 3
+
+export type GoalType = 'income' | 'growth' | 'protect' | 'custom'
+
+export interface UserGoal {
+  type: GoalType
+  label: string
+  targetMonthlyIncome?: number  // for income goal
+  targetPortfolioValue?: number // for growth goal
+  customText?: string           // for custom goal
+}

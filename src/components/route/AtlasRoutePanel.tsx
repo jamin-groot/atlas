@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AtlasRoute } from '@/types/atlas'
+import { AtlasRoute, UserGoal } from '@/types/atlas'
 import { DISTRICT_COLORS } from '@/lib/mockPortfolio'
 
 function buildShareUrl(route: AtlasRoute): string {
@@ -24,9 +24,11 @@ interface Props {
   onAccept: (route: AtlasRoute) => void
   onDismiss: () => void
   visible: boolean
+  goal?: UserGoal | null
+  goalProgress?: number
 }
 
-export function AtlasRoutePanel({ activeRoute, routes, onSelectRoute, onAccept, onDismiss, visible }: Props) {
+export function AtlasRoutePanel({ activeRoute, routes, onSelectRoute, onAccept, onDismiss, visible, goal, goalProgress }: Props) {
   const [copied, setCopied] = useState(false)
   const color = activeRoute ? (DISTRICT_COLORS[activeRoute.to.district] ?? '#34D186') : '#34D186'
 
@@ -82,6 +84,25 @@ export function AtlasRoutePanel({ activeRoute, routes, onSelectRoute, onAccept, 
                 </div>
                 <button onClick={onDismiss} className="text-white/25 hover:text-white/50 transition-colors text-xs font-mono">✕</button>
               </div>
+
+              {/* Goal progress bar */}
+              {goal && typeof goalProgress === 'number' && goalProgress > 0 && (
+                <div className="mb-5 rounded-xl px-4 py-3 border border-white/6 bg-white/2">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-[9px] font-mono text-white/30 uppercase tracking-wider">Goal progress</p>
+                    <p className="text-[10px] font-mono text-[#34D186]">{goalProgress}%</p>
+                  </div>
+                  <p className="text-[11px] text-white/50 mb-2">{goal.label}</p>
+                  <div className="h-1 rounded-full bg-white/6 overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${goalProgress}%` }}
+                      transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                      className="h-full rounded-full bg-[#34D186]"
+                    />
+                  </div>
+                </div>
+              )}
 
               {activeRoute && (
                 <>

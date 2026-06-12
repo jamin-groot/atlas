@@ -18,8 +18,9 @@ import { AchievementToast } from '@/components/achievements/AchievementToast'
 import { useAchievements } from '@/hooks/useAchievements'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { useNotifications } from '@/hooks/useNotifications'
-import { AtlasRoute } from '@/types/atlas'
-import { generateRoutes } from '@/lib/routes'
+import { AtlasRoute, UserGoal } from '@/types/atlas'
+import { generateRoutes, goalProgress } from '@/lib/routes'
+import { GoalSetModal } from '@/components/goal/GoalSetModal'
 import { useVaultAPY } from '@/hooks/useVaultAPY'
 import { District, Opportunity, UserIsland } from '@/types/atlas'
 import { useWalletPortfolio } from '@/hooks/useWalletPortfolio'
@@ -65,6 +66,8 @@ export default function AtlasPage() {
   const [activeRoute, setActiveRoute] = useState<AtlasRoute | null>(null)
   const [showRoutes, setShowRoutes] = useState(false)
   const [navigatorCtx, setNavigatorCtx] = useState<NavigatorContext | null>(null)
+  const [userGoal, setUserGoal] = useState<UserGoal | null>(null)
+  const [showGoalModal, setShowGoalModal] = useState(false)
 
   const setNav = useCallback((event: string) => {
     setNavigatorCtx(prev => ({
@@ -164,6 +167,8 @@ export default function AtlasPage() {
       setShowRoutes(false)
       setActiveRoute(null)
       setAllocationHistory([])
+      setUserGoal(null)
+      setShowGoalModal(false)
     }
   }, [isConnected]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -213,16 +218,8 @@ export default function AtlasPage() {
             setPhase('island')
             if (realPortfolio) {
               setPortfolio(realPortfolio)
-              const routes = generateRoutes(realPortfolio, liveAPY)
-              if (routes[0]) {
-                setActiveRoute(routes[0])
-                setShowRoutes(true)
-                const mo = routes[0].projectedMonthlyIncome.toFixed(0)
-                setNav(`Your island is ready. I found a route that could add $${mo}/month to your income.`)
-                pushNotif('route', 'Route discovered', `Atlas Navigator found a route that adds $${mo}/month to your income.`, { label: 'View route', onClick: () => setShowRoutes(true) })
-              } else {
-                setNav('Your island is ready. Explore the districts to find opportunities.')
-              }
+              setNav('Your island is ready. Tell me what you\'re trying to achieve and I\'ll build routes toward your goal.')
+              setShowGoalModal(true)
             } else {
               // Real data still loading — continuous sync effect will update portfolio once ready
               setNav('Your island is ready. Syncing on-chain data…')
@@ -380,15 +377,16 @@ export default function AtlasPage() {
               </button>
               <button
                 onClick={() => {
+                  if (!userGoal) { setShowGoalModal(true); return }
                   if (portfolio) {
-                    const routes = generateRoutes(portfolio, liveAPY)
+                    const routes = generateRoutes(portfolio, liveAPY, userGoal)
                     if (routes[0]) setActiveRoute(routes[0])
                   }
                   setShowRoutes(true)
                 }}
                 className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
               >
-                Routes
+                {userGoal ? 'Routes' : 'Set goal'}
               </button>
               {isWrongNetwork && (
                 <span className="text-[10px] font-mono text-amber-400 border border-amber-400/30 rounded-full px-3 py-1.5 animate-pulse">
@@ -522,7 +520,8 @@ export default function AtlasPage() {
 
       {/* Atlas Route — Screen 6 */}
       {(() => {
-        const routes = portfolio ? generateRoutes(portfolio, liveAPY) : []
+        const routes = portfolio ? generateRoutes(portfolio, liveAPY, userGoal) : []
+        const gp = portfolio && userGoal ? goalProgress(portfolio, userGoal) : undefined
         return (
           <AtlasRoutePanel
             activeRoute={activeRoute}
@@ -531,13 +530,15 @@ export default function AtlasPage() {
             onAccept={handleFollowRoute}
             onDismiss={() => setShowRoutes(false)}
             visible={showRoutes && !activeOp && !showSimulator}
+            goal={userGoal}
+            goalProgress={gp}
           />
         )
       })()}
 
       {/* Portfolio Evolution — Screen 9 */}
       {(() => {
-        const routes = portfolio ? generateRoutes(portfolio, liveAPY) : []
+        const routes = portfolio ? generateRoutes(portfolio, liveAPY, userGoal) : []
         const nextRoute = routes[1] ?? routes[0] ?? null
         return (
           <PortfolioEvolution
@@ -668,6 +669,29 @@ export default function AtlasPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Goal Modal — shown once after island loads */}
+      <GoalSetModal
+        visible={showGoalModal}
+        monthlyIncome={portfolio?.positions.reduce((s, p) => s + p.income, 0) ?? 0}
+        portfolioValue={portfolio?.totalValue ?? 0}
+        onSet={goal => {
+          setUserGoal(goal)
+          setShowGoalModal(false)
+          if (portfolio) {
+            const routes = generateRoutes(portfolio, liveAPY, goal)
+            if (routes[0]) {
+              setActiveRoute(routes[0])
+              setShowRoutes(true)
+              const mo = routes[0].projectedMonthlyIncome.toFixed(0)
+              setNav(`Goal set: ${goal.label}. I built ${routes.length} route${routes.length > 1 ? 's' : ''} toward it. First stop adds $${mo}/month.`)
+              pushNotif('route', 'Routes ready', `${routes.length} route${routes.length > 1 ? 's' : ''} built toward your goal. First stop adds $${mo}/month.`, { label: 'View routes', onClick: () => setShowRoutes(true) })
+            } else {
+              setNav(`Goal set: ${goal.label}. Explore the districts to start building toward it.`)
+            }
+          }
+        }}
+      />
 
       {/* Atlas Navigator */}
       <div className="absolute bottom-8 left-6 z-10">
