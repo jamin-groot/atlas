@@ -64,11 +64,16 @@ export function MarketingLanding({ onEnter }: Props) {
           className="relative flex flex-col items-center gap-7 max-w-4xl pointer-events-auto">
 
           {/* Announcement badge — Giga style */}
-          <button className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/12 bg-white/5 backdrop-blur-sm hover:border-white/20 transition-colors">
+          <a
+            href="https://faucet.sepolia.mantle.xyz/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/12 bg-white/5 backdrop-blur-sm hover:border-white/20 transition-colors"
+          >
             <div className="w-1.5 h-1.5 rounded-full bg-[#34D186] shadow-[0_0_6px_#34D186]" />
             <span className="text-[10px] font-mono text-white/50 uppercase tracking-[0.2em]">Now live on Mantle Sepolia</span>
             <span className="text-white/25 text-xs">›</span>
-          </button>
+          </a>
 
           {/* Headline */}
           <h1 className="text-[48px] sm:text-[72px] lg:text-[96px] font-light leading-[1.02] tracking-[-0.025em] text-white">

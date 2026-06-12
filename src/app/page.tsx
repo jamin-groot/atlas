@@ -433,6 +433,12 @@ export default function AtlasPage() {
                 {address ? `${address.slice(0,6)}…${address.slice(-4)}` : ''} · $
                 {portfolio.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} · Health {portfolio.healthScore}
               </button>
+              <button
+                onClick={() => disconnect()}
+                className="text-[10px] font-mono text-white/25 border border-white/6 rounded-full px-3 py-1.5 hover:text-red-400/70 hover:border-red-400/20 transition-all uppercase tracking-wider"
+              >
+                Disconnect
+              </button>
             </div>
           )}
           {/* Not connected — subtle hint, no pressure */}
