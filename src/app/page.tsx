@@ -377,6 +377,36 @@ export default function AtlasPage() {
               >
                 Evolution
               </button>
+              {/* Goal progress tracker */}
+              {userGoal && portfolio ? (() => {
+                const gp = goalProgress(portfolio, userGoal)
+                return (
+                  <button
+                    onClick={() => setShowGoalModal(true)}
+                    className="flex items-center gap-2.5 border rounded-full px-3 py-1.5 transition-all hover:border-[#34D186]/40 group"
+                    style={{ borderColor: 'rgba(52,209,134,0.2)', background: 'rgba(52,209,134,0.04)' }}
+                  >
+                    {/* Mini arc progress */}
+                    <div className="relative w-4 h-4 flex-shrink-0">
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="-rotate-90">
+                        <circle cx="8" cy="8" r="6" fill="none" stroke="rgba(52,209,134,0.15)" strokeWidth="2" />
+                        <circle cx="8" cy="8" r="6" fill="none" stroke="#34D186" strokeWidth="2"
+                          strokeDasharray={`${(gp / 100) * 37.7} 37.7`}
+                          strokeLinecap="round" />
+                      </svg>
+                    </div>
+                    <span className="text-[10px] font-mono text-[#34D186]">{gp}%</span>
+                    <span className="text-[10px] font-mono text-white/35 max-w-[100px] truncate">{userGoal.label}</span>
+                  </button>
+                )
+              })() : (
+                <button
+                  onClick={() => setShowGoalModal(true)}
+                  className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
+                >
+                  Set goal
+                </button>
+              )}
               <button
                 onClick={() => {
                   if (!userGoal) { setShowGoalModal(true); return }
@@ -388,7 +418,7 @@ export default function AtlasPage() {
                 }}
                 className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
               >
-                {userGoal ? 'Routes' : 'Set goal'}
+                Routes
               </button>
               {isWrongNetwork && (
                 <span className="text-[10px] font-mono text-amber-400 border border-amber-400/30 rounded-full px-3 py-1.5 animate-pulse">
