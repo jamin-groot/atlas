@@ -92,17 +92,156 @@ export function MarketingLanding({ onEnter }: Props) {
           </div>
         </motion.div>
 
-        {/* Logo parade */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4, duration: 1 }}
-          className="absolute bottom-12 inset-x-0 flex flex-col items-center gap-5 px-6">
-          <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.25em]">Built on & integrated with</p>
-          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10 opacity-30">
-            {['Mantle','Ondo Finance','mETH Protocol','Agni Finance','Lendle'].map(n => (
-              <span key={n} className="text-sm font-light text-white/70 whitespace-nowrap">{n}</span>
-            ))}
-          </div>
-        </motion.div>
       </section>
+
+      {/* ── PRODUCT THUMBNAIL ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 48 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        className="relative z-10 bg-[#030712] px-4 sm:px-8 pt-0 pb-20"
+      >
+        {/* fade from hero section into thumbnail */}
+        <div className="absolute inset-x-0 -top-32 h-32 pointer-events-none bg-gradient-to-b from-transparent to-[#030712]" />
+
+        <div className="max-w-5xl mx-auto">
+          {/* Browser chrome frame */}
+          <div className="rounded-2xl overflow-hidden shadow-[0_0_80px_rgba(52,209,134,0.08),0_40px_100px_rgba(0,0,0,0.6)] border border-white/8"
+            style={{ background: '#0a1020' }}>
+
+            {/* Title bar */}
+            <div className="flex items-center gap-3 px-5 py-3.5 border-b border-white/6" style={{ background: '#060d1a' }}>
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+                <div className="w-2.5 h-2.5 rounded-full bg-white/10" />
+              </div>
+              <div className="flex-1 flex justify-center">
+                <div className="flex items-center gap-2 px-4 py-1 rounded-md text-[10px] font-mono text-white/20 border border-white/6"
+                  style={{ background: 'rgba(255,255,255,0.03)' }}>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#34D186]" />
+                  atlas-web3.vercel.app
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#34D186] shadow-[0_0_6px_#34D186]" />
+                <span className="text-[9px] font-mono text-white/18 uppercase tracking-wider">Mantle Sepolia</span>
+              </div>
+            </div>
+
+            {/* App content mockup */}
+            <div className="relative overflow-hidden" style={{ height: '480px', background: '#030712' }}>
+
+              {/* Starfield dots */}
+              {[...Array(40)].map((_, i) => (
+                <div key={i} className="absolute rounded-full bg-white"
+                  style={{
+                    width: i % 5 === 0 ? '2px' : '1px',
+                    height: i % 5 === 0 ? '2px' : '1px',
+                    left: `${(i * 37 + 11) % 100}%`,
+                    top: `${(i * 53 + 7) % 100}%`,
+                    opacity: 0.08 + (i % 4) * 0.05,
+                  }} />
+              ))}
+
+              {/* World glow */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-[600px] h-[400px] rounded-full blur-[80px] opacity-30"
+                  style={{ background: 'radial-gradient(circle, rgba(52,209,134,0.15) 0%, rgba(59,130,246,0.08) 40%, transparent 70%)' }} />
+              </div>
+
+              {/* Island world — center */}
+              <div className="absolute inset-0 flex items-center justify-center" style={{ left: '-160px' }}>
+                <IslandWorldPreview />
+              </div>
+
+              {/* Side panel */}
+              <div className="absolute top-0 right-0 bottom-0 w-[280px] border-l border-white/6 flex flex-col"
+                style={{ background: 'rgba(5,10,22,0.96)', backdropFilter: 'blur(20px)' }}>
+
+                {/* Panel header */}
+                <div className="px-5 py-4 border-b border-white/6">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[9px] font-mono text-white/30 uppercase tracking-wider">Your Island</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#34D186]" />
+                      <span className="text-[9px] font-mono text-[#34D186]/70">68</span>
+                    </div>
+                  </div>
+                  <p className="text-base font-light text-white">$24,680</p>
+                  <p className="text-[10px] text-[#34D186] font-mono mt-0.5">+$122 / yr · 5.1% avg</p>
+                </div>
+
+                {/* Allocation bars */}
+                <div className="px-5 py-4 flex-1">
+                  <p className="text-[9px] font-mono text-white/25 uppercase tracking-wider mb-4">Portfolio Allocation</p>
+                  {[
+                    { label: 'Income', pct: 38, color: '#3B82F6', apy: '5.1%' },
+                    { label: 'Staking', pct: 24, color: '#34D186', apy: '3.8%' },
+                    { label: 'Growth', pct: 22, color: '#F59E0B', apy: '14%' },
+                    { label: 'Emerging', pct: 16, color: '#EF4444', apy: '22%' },
+                  ].map(d => (
+                    <div key={d.label} className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.color }} />
+                          <span className="text-[10px] font-mono text-white/45">{d.label}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[9px] font-mono" style={{ color: d.color }}>{d.apy}</span>
+                          <span className="text-[9px] font-mono text-white/30">{d.pct}%</span>
+                        </div>
+                      </div>
+                      <div className="h-1 rounded-full bg-white/5">
+                        <div className="h-1 rounded-full" style={{ width: `${d.pct}%`, background: d.color, opacity: 0.7 }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Bottom stats */}
+                <div className="px-5 py-4 border-t border-white/6 grid grid-cols-2 gap-4">
+                  {[['72', 'Health Score'], ['4', 'Districts']].map(([v, l]) => (
+                    <div key={l}>
+                      <p className="text-sm font-light text-white">{v}</p>
+                      <p className="text-[8px] font-mono text-white/25 uppercase tracking-wide mt-0.5">{l}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* District labels floating in world */}
+              {[
+                { label: 'Income', apy: '5.1%', color: '#3B82F6', left: '12%', top: '22%' },
+                { label: 'Staking', apy: '3.8%', color: '#34D186', left: '38%', top: '12%' },
+                { label: 'Growth', apy: '14%', color: '#F59E0B', left: '18%', top: '62%' },
+              ].map(d => (
+                <div key={d.label} className="absolute flex flex-col items-center gap-1 pointer-events-none"
+                  style={{ left: d.left, top: d.top }}>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[9px] font-mono"
+                    style={{ borderColor: `${d.color}35`, background: 'rgba(5,10,22,0.85)', color: d.color }}>
+                    <div className="w-1 h-1 rounded-full" style={{ backgroundColor: d.color }} />
+                    {d.apy} APY
+                  </div>
+                  <div className="w-1.5 h-1.5 rounded-full shadow-lg" style={{ backgroundColor: d.color, boxShadow: `0 0 8px ${d.color}` }} />
+                  <span className="text-[8px] font-mono tracking-wider" style={{ color: `${d.color}60` }}>{d.label.toUpperCase()}</span>
+                </div>
+              ))}
+
+            </div>
+          </div>
+
+          {/* Logo parade below thumbnail */}
+          <div className="mt-16 flex flex-col items-center gap-5">
+            <p className="text-[9px] font-mono text-white/20 uppercase tracking-[0.25em]">Built on & integrated with</p>
+            <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10 opacity-30">
+              {['Mantle','Ondo Finance','mETH Protocol','Agni Finance','Lendle'].map(n => (
+                <span key={n} className="text-sm font-light text-white/70 whitespace-nowrap">{n}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
       {/* ── BELOW FOLD — solid dark bg so 3D world is hidden ── */}
       <div className="relative bg-[#030712]">
@@ -522,6 +661,79 @@ function FadeIn({ children, delay = 0, className = '' }: { children: React.React
       className={className}>
       {children}
     </motion.div>
+  )
+}
+
+// Pre-computed static island data — no runtime trig to avoid SSR/client float divergence
+const ISLANDS = [
+  {
+    x: 0, y: 0, r: 90, ry: 34, color: '#34D186',
+    pillars: [
+      { px: 0, pz: 15, h: 38, c: '#3B82F6' },
+      { px: 33, pz: -7, h: 24, c: '#34D186' },
+      { px: -33, pz: -7, h: 18, c: '#F59E0B' },
+    ],
+  },
+  {
+    x: -190, y: 40, r: 64, ry: 24, color: '#3B82F6',
+    pillars: [
+      { px: 0, pz: 11, h: 28, c: '#3B82F6' },
+      { px: 23, pz: -5, h: 16, c: '#34D186' },
+    ],
+  },
+  {
+    x: 180, y: -30, r: 56, ry: 21, color: '#8B5CF6',
+    pillars: [
+      { px: 0, pz: 9, h: 20, c: '#8B5CF6' },
+      { px: 20, pz: -4, h: 14, c: '#F59E0B' },
+    ],
+  },
+  {
+    x: -90, y: -120, r: 44, ry: 17, color: '#F59E0B',
+    pillars: [{ px: 0, pz: 7, h: 16, c: '#F59E0B' }],
+  },
+  {
+    x: 110, y: 130, r: 40, ry: 15, color: '#EF4444',
+    pillars: [{ px: 0, pz: 6, h: 12, c: '#EF4444' }],
+  },
+] as const
+
+function IslandWorldPreview() {
+  return (
+    <svg width="560" height="480" viewBox="-280 -240 560 480" style={{ overflow: 'visible' }}>
+      <defs>
+        <filter id="iblur1"><feGaussianBlur stdDeviation="8" /></filter>
+        <filter id="iblur2"><feGaussianBlur stdDeviation="3" /></filter>
+      </defs>
+
+      {ISLANDS.map((isl, idx) => (
+        <g key={idx} transform={`translate(${isl.x}, ${isl.y})`}>
+          {/* Glow pool */}
+          <ellipse cx="0" cy={isl.ry + 6} rx={isl.r * 1.3} ry={isl.ry * 0.7} fill={isl.color} opacity="0.06" filter="url(#iblur1)" />
+          {/* Island base layers */}
+          <ellipse cx="0" cy={isl.ry} rx={isl.r} ry={isl.ry} fill="#0a1628" />
+          <ellipse cx="0" cy={isl.ry - 10} rx={isl.r * 0.85} ry={isl.ry * 0.85} fill="#0d1e38" />
+          <ellipse cx="0" cy={isl.ry - 20} rx={isl.r * 0.7} ry={isl.ry * 0.7} fill="#112040" />
+          {/* Top face */}
+          <ellipse cx="0" cy={0} rx={isl.r * 0.7} ry={isl.ry * 0.7}
+            fill={isl.color} fillOpacity="0.06" stroke={isl.color} strokeOpacity="0.15" strokeWidth="1" />
+          {/* Pillars */}
+          {isl.pillars.map((p, pi) => (
+            <g key={pi} transform={`translate(${p.px}, ${p.pz - p.h / 2})`}>
+              <rect x="-4" y={-p.h / 2} width="8" height={p.h} rx="2" fill={p.c} fillOpacity="0.85" />
+              <ellipse cx="0" cy={-p.h / 2} rx="6" ry="3" fill={p.c} fillOpacity="0.5" filter="url(#iblur2)" />
+            </g>
+          ))}
+          {/* Crystal */}
+          <polygon points={`0,${-isl.r * 0.45} ${isl.r * 0.13},${-isl.r * 0.15} 0,${isl.r * 0.05} ${-isl.r * 0.13},${-isl.r * 0.15}`}
+            fill={isl.color} fillOpacity="0.9" />
+          <ellipse cx="0" cy={-isl.r * 0.2} rx={isl.r * 0.22} ry={isl.r * 0.22} fill={isl.color} fillOpacity="0.08" filter="url(#iblur2)" />
+          {/* Orbit ring */}
+          <ellipse cx="0" cy={-isl.r * 0.1} rx={isl.r * 0.78} ry={isl.r * 0.25}
+            fill="none" stroke={isl.color} strokeOpacity="0.25" strokeWidth="1" />
+        </g>
+      ))}
+    </svg>
   )
 }
 
