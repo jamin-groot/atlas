@@ -81,9 +81,11 @@ export default function AtlasPage() {
             monthlyIncome: portfolio.positions.reduce((s, p) => s + p.income, 0),
           }
         : null,
+      goal: userGoal ? { type: userGoal.type, label: userGoal.label } : null,
+      goalProgress: portfolio && userGoal ? goalProgress(portfolio, userGoal) : null,
       event,
     }))
-  }, [phase, activeDistrict, activeOp, portfolio])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [phase, activeDistrict, activeOp, portfolio, userGoal])  // eslint-disable-line react-hooks/exhaustive-deps
   const [scanStep, setScanStep] = useState(0)
   const [showScan, setShowScan] = useState(false)
 
@@ -699,6 +701,13 @@ export default function AtlasPage() {
           context={navigatorCtx}
           visible={phase !== 'landing' && !showScan}
           onExplore={() => setShowRoutes(true)}
+          onSuggestRoute={() => {
+            if (portfolio) {
+              const routes = generateRoutes(portfolio, liveAPY, userGoal)
+              if (routes[0]) setActiveRoute(routes[0])
+            }
+            setShowRoutes(true)
+          }}
         />
       </div>
 
