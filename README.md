@@ -59,6 +59,17 @@ Explorer: [explorer.sepolia.mantle.xyz](https://explorer.sepolia.mantle.xyz)
 
 ---
 
+## Why Mantle
+
+Atlas is built specifically for Mantle — not just deployed on it.
+
+- **Low-gas micro-allocations** — Mantle's near-zero fees make small-capital onboarding economically viable. A $50 allocation into USDY would be uneconomical on Ethereum mainnet; on Mantle it costs fractions of a cent.
+- **Native RWA assets** — USDY, mETH, and mUSD exist within Mantle's DeFi/CeFi ecosystem, giving users access to real yield without bridging to another chain.
+- **Transparent AI decisions** — Every Navigator recommendation is recorded on-chain via ERC-8004 contracts deployed on Mantle Sepolia, making AI outputs permanently auditable.
+- **Gas savings surfaced in UI** — After every allocation, Atlas shows the user the real network fee paid and compares it against the Ethereum mainnet equivalent, making Mantle's cost advantage tangible rather than a talking point.
+
+---
+
 ## Getting Started
 
 ### Prerequisites
