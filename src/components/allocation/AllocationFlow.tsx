@@ -130,10 +130,10 @@ export function AllocationFlow({ opportunity, amount: defaultAmount, portfolio, 
     if (!visible) {
       setStep('amount')
       setTxError(null)
-      setInputVal(String(defaultAmount))
-      setAmount(defaultAmount)
     }
-  }, [visible]) // eslint-disable-line react-hooks/exhaustive-deps
+    setInputVal(String(defaultAmount))
+    setAmount(defaultAmount)
+  }, [visible, defaultAmount]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleSign() {
     if (!address) {
