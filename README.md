@@ -148,6 +148,9 @@ contracts/
 
 ## Built For
 
-**Turing Test Hackathon** — Mantle × ERC-8004 track
+**Turing Test Hackathon 2026** — $100K prize pool
+
+Primary track: **AI x RWA** — Dynamic yield and automated risk for assets like USDY and mETH on Mantle.
+Secondary tracks: **Consumer & Viral DApps** · **AI Trading & Strategy**
 
 Built by [@jamin-groot](https://github.com/jamin-groot)
