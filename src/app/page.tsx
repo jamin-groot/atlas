@@ -662,7 +662,7 @@ export default function AtlasPage() {
               handleConnectWallet()
               return
             }
-            setAllocationAmount(500); setShowAllocation(true)
+            setShowAllocation(true)
           }}
           onTrust={() => setShowTrust(true)}
         />
