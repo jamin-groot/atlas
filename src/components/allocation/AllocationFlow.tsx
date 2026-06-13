@@ -68,8 +68,23 @@ export function AllocationFlow({ opportunity, amount: defaultAmount, portfolio, 
   const vaultAddress = opportunity ? VAULT_ADDRESSES[opportunity.id] : undefined
 
   const { writeContract, data: txHash, isPending: isSigning, error: writeError } = useWriteContract()
-  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError } =
+  const { isLoading: isConfirming, isSuccess: isConfirmed, error: receiptError, data: txReceipt } =
     useWaitForTransactionReceipt({ hash: txHash })
+
+  // Real gas cost from receipt
+  const gasCostUsd = (() => {
+    if (!txReceipt?.gasUsed || !txReceipt?.effectiveGasPrice) return null
+    const costMnt = Number(txReceipt.gasUsed * txReceipt.effectiveGasPrice) / 1e18
+    return costMnt * MNT_USD
+  })()
+  // Ethereum mainnet equivalent: same gas units × 20 gwei × $3500/ETH
+  const ethEquivUsd = (() => {
+    if (!txReceipt?.gasUsed) return null
+    return (Number(txReceipt.gasUsed) * 20e9 * 3500) / 1e18
+  })()
+  const gasSavingsPct = gasCostUsd && ethEquivUsd && ethEquivUsd > 0
+    ? Math.round((1 - gasCostUsd / ethEquivUsd) * 100)
+    : 99
 
   // Advance steps based on tx state
   useEffect(() => {
@@ -526,6 +541,20 @@ export function AllocationFlow({ opportunity, amount: defaultAmount, portfolio, 
                         <div className="flex justify-between text-sm">
                           <span className="text-white/45">Annual income</span>
                           <span className="font-mono" style={{ color }}>${((currentMonthly + monthly) * 12).toFixed(0)}/yr</span>
+                        </div>
+                        <div className="h-px bg-white/8 my-1" />
+                        <div className="flex justify-between text-sm items-center">
+                          <span className="text-white/45">Network fee</span>
+                          <span className="font-mono text-white/60">
+                            {gasCostUsd != null ? `$${gasCostUsd.toFixed(4)}` : '~$0.01'}
+                          </span>
+                        </div>
+                        <div className="rounded-lg px-3 py-2 flex items-center justify-between"
+                          style={{ background: color + '12', border: `1px solid ${color}25` }}>
+                          <span className="text-[10px] text-white/50">vs Ethereum mainnet</span>
+                          <span className="text-[10px] font-mono font-semibold" style={{ color }}>
+                            {gasSavingsPct}% cheaper on Mantle ⚡
+                          </span>
                         </div>
                         {txHash && (
                           <a
