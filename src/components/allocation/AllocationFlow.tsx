@@ -400,7 +400,7 @@ export function AllocationFlow({ opportunity, amount: defaultAmount, portfolio, 
 
                       <div className="rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-5 mb-5">
                         <div className="flex items-center gap-3 mb-4 pb-4 border-b border-white/8">
-                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D186] to-[#3B82F6] flex-shrink-0" />
+                          <img src="https://assets.coingecko.com/coins/images/30980/small/token-logo.png" alt="Mantle" className="w-8 h-8 rounded-full flex-shrink-0 object-cover" />
                           <div>
                             <p className="text-xs text-white font-medium">Mantle Network</p>
                             <p className="text-[10px] text-white/35 font-mono">
