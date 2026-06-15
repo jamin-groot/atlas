@@ -293,7 +293,7 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAle
                           : 'bg-[#34D186]/10 border border-[#34D186]/20 text-white/80'
                       }`}
                     >
-                      {m.content}
+                      {stripAction(m.content)}
                       {m.role === 'assistant' && streaming && i === messages.length - 1 && (
                         <span className="inline-block w-1.5 h-3 bg-[#34D186] ml-0.5 animate-pulse align-middle" />
                       )}
