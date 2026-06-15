@@ -645,6 +645,11 @@ export default function AtlasPage() {
           if (walletPortfolio) saveSnapshot(walletPortfolio, `deposit:${op.id}:$${amt}`)
 
           setTimeout(() => setShowEvolution(true), 1200)
+          setTimeout(() => {
+            navigatorRef.current?.sendMessage(
+              `I just allocated $${amt} to ${op.name} (${op.id.toUpperCase()}). What's the ripple effect on my portfolio — health score, income, diversification, and what should I do next?`
+            )
+          }, 2000)
         }}
       />
 
