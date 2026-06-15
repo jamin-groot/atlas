@@ -150,31 +150,11 @@ export async function POST(req: Request) {
   const encoder = new TextEncoder()
   const readable = new ReadableStream({
     async start(controller) {
-      let buffer = ''
       for await (const event of stream) {
         if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
           fullResponse += event.delta.text
-          buffer += event.delta.text
-          // Hold back any potential partial [ACTION:...] tag at the end
-          const actionStart = buffer.lastIndexOf('[ACTION:')
-          if (actionStart >= 0) {
-            // Flush everything before the tag
-            const safe = buffer.slice(0, actionStart)
-            if (safe) controller.enqueue(encoder.encode(safe))
-            buffer = buffer.slice(actionStart)
-          } else {
-            controller.enqueue(encoder.encode(buffer))
-            buffer = ''
-          }
+          controller.enqueue(encoder.encode(event.delta.text))
         }
-      }
-      // Strip complete ACTION tags from any remaining buffer
-      const stripped = buffer.replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '').trim()
-      if (stripped) controller.enqueue(encoder.encode(stripped))
-      // Send action data as a special delimiter the client can parse
-      const actionMatch = fullResponse.match(/\[ACTION:allocate:([\w-]+):(\d+(?:\.\d+)?)\]/)
-      if (actionMatch) {
-        controller.enqueue(encoder.encode(`\n<!--ACTION:${actionMatch[1]}:${actionMatch[2]}-->`))
       }
       controller.close()
 
