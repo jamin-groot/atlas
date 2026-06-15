@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useImperativeHandle, forwardRef } from 'react'
 import { motion, AnimatePresence, useDragControls } from 'framer-motion'
 import { UserIsland } from '@/types/atlas'
 import { useMemoryProfile } from '@/hooks/useMemoryProfile'
@@ -48,10 +48,15 @@ function stripAction(content: string): string {
     .trim()
 }
 
-export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props) {
+export interface NavigatorChatHandle {
+  sendMessage: (text: string) => void
+}
+
+export const NavigatorChat = forwardRef<NavigatorChatHandle, Props>(function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props, ref) {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [pendingAction, setPendingAction] = useState<AllocateAction | null>(null)
+  const lastDispatchedAction = useRef<AllocateAction | null>(null)
   const [input, setInput] = useState('')
   const [streaming, setStreaming] = useState(false)
   const [unread, setUnread] = useState(false)
@@ -156,6 +161,13 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAle
       setStreaming(false)
     }
   }, [messages, portfolio, streaming, open])
+
+  useImperativeHandle(ref, () => ({
+    sendMessage: (text: string) => {
+      setOpen(true)
+      setTimeout(() => send(text), 150)
+    }
+  }), [send])
 
   if (!visible) return null
 
@@ -312,6 +324,7 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAle
                 <div className="flex justify-start">
                   <button
                     onClick={() => {
+                      lastDispatchedAction.current = pendingAction
                       onAllocate?.(pendingAction)
                       setPendingAction(null)
                       setOpen(false)
@@ -377,5 +390,4 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAle
       </motion.button>
     </>
   )
-}
-// cache bust 1781554032
+})

@@ -5,7 +5,7 @@ import { useConnect, useAccount, useDisconnect } from 'wagmi'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AtlasNavigator, NavigatorContext } from '@/components/navigator/AtlasNavigator'
-import { NavigatorChat } from '@/components/navigator/NavigatorChat'
+import { NavigatorChat, NavigatorChatHandle } from '@/components/navigator/NavigatorChat'
 import { UserIslandPanel } from '@/components/world/UserIslandPanel'
 import { DistrictExplorer } from '@/components/districts/DistrictExplorer'
 import { OpportunityView } from '@/components/opportunity/OpportunityView'
@@ -61,6 +61,8 @@ export default function AtlasPage() {
   const [showSimulator, setShowSimulator] = useState(false)
   const [showAllocation, setShowAllocation] = useState(false)
   const [allocationAmount, setAllocationAmount] = useState(500)
+  const navigatorRef = useRef<NavigatorChatHandle>(null)
+  const navigatorInitiated = useRef<{ opportunityId: string; amount: number } | null>(null)
   const [showEvolution, setShowEvolution] = useState(false)
   const [allocationHistory, setAllocationHistory] = useState<{ opportunity: Opportunity; amount: number; date: string }[]>([])
   const [activeRoute, setActiveRoute] = useState<AtlasRoute | null>(null)
@@ -339,12 +341,14 @@ export default function AtlasPage() {
               visible
               wallet={address}
               agentAlertCount={agentAlertUnread}
+              ref={navigatorRef}
               onAllocate={({ opportunityId, amount }) => {
                 const allOps = DISTRICTS.flatMap(d => d.opportunities)
                 const op = allOps.find(o => o.id === opportunityId)
                   ?? allOps.find(o => opportunityId.includes(o.id) || o.id.includes(opportunityId))
                   ?? allOps.find(o => o.id === 'usdy')
                 if (op) {
+                  navigatorInitiated.current = { opportunityId: op.id, amount }
                   setActiveOp(op)
                   setShowAllocation(false)
                   setTimeout(() => {
@@ -606,8 +610,20 @@ export default function AtlasPage() {
         amount={allocationAmount}
         portfolio={portfolio}
         visible={showAllocation}
-        onBack={() => setShowAllocation(false)}
+        onBack={() => {
+          setShowAllocation(false)
+          if (navigatorInitiated.current) {
+            const aborted = navigatorInitiated.current
+            navigatorInitiated.current = null
+            setTimeout(() => {
+              navigatorRef.current?.sendMessage(
+                `I decided not to allocate $${aborted.amount} to ${aborted.opportunityId.toUpperCase()}. What else can I do?`
+              )
+            }, 300)
+          }
+        }}
         onSuccess={(op, amt) => {
+          navigatorInitiated.current = null
           setShowAllocation(false)
           setActiveOp(null)
           const mo = ((amt * op.apy) / 100 / 12).toFixed(0)
