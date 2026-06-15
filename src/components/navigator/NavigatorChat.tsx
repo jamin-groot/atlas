@@ -33,13 +33,13 @@ const SUGGESTIONS = [
 
 // Parse [ACTION:allocate:opportunityId:amount] from assistant message
 function parseAction(content: string): AllocateAction | null {
-  const match = content.match(/\[ACTION:allocate:(\w+):(\d+(?:\.\d+)?)\]/)
+  const match = content.match(/\[ACTION:allocate:([\w-]+):(\d+(?:\.\d+)?)\]/)
   if (!match) return null
   return { opportunityId: match[1], amount: parseFloat(match[2]) }
 }
 
 function stripAction(content: string): string {
-  return content.replace(/\[ACTION:allocate:[^\]]+\]/g, '').trim()
+  return content.replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '').trim()
 }
 
 export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props) {
