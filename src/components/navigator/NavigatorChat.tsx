@@ -54,7 +54,12 @@ export interface NavigatorChatHandle {
 
 export const NavigatorChat = forwardRef<NavigatorChatHandle, Props>(function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props, ref) {
   const [open, setOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (typeof window === 'undefined' || !wallet) return []
+    try {
+      return JSON.parse(localStorage.getItem(`atlas-chat-${wallet}`) || '[]')
+    } catch { return [] }
+  })
   const [pendingAction, setPendingAction] = useState<AllocateAction | null>(null)
   const lastDispatchedAction = useRef<AllocateAction | null>(null)
   const [input, setInput] = useState('')
@@ -68,6 +73,21 @@ export const NavigatorChat = forwardRef<NavigatorChatHandle, Props>(function Nav
   const abortRef = useRef<AbortController | null>(null)
   const dragControls = useDragControls()
   const profile = useMemoryProfile(wallet)
+
+  // Persist chat history per wallet
+  useEffect(() => {
+    if (!wallet || !messages.length) return
+    localStorage.setItem(`atlas-chat-${wallet}`, JSON.stringify(messages.slice(-50)))
+  }, [wallet, messages])
+
+  // Restore chat when wallet changes
+  useEffect(() => {
+    if (!wallet) { setMessages([]); return }
+    try {
+      const saved = JSON.parse(localStorage.getItem(`atlas-chat-${wallet}`) || '[]')
+      if (saved.length) setMessages(saved)
+    } catch { /* ignore */ }
+  }, [wallet])
 
   useEffect(() => {
     if (open) {
