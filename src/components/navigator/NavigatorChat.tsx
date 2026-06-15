@@ -39,7 +39,7 @@ function parseAction(content: string): AllocateAction | null {
 }
 
 function stripAction(content: string): string {
-  return content.replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '').trim()
+  return content.replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '').replace(/\[ACTION:allocate[^\]]*$/g, '').trim()
 }
 
 export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props) {
