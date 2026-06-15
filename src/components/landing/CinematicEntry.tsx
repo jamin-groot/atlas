@@ -75,7 +75,7 @@ function LogoMark({ phase }: { phase: 'drawing' | 'filled' | 'hidden' }) {
   })
 
   return (
-    <svg width="52" height="52" viewBox="0 0 37 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="39" height="52" viewBox="0 0 37 50" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* Top bar — blue */}
       <motion.path d="M20.9276 16.0242C20.9276 17.4756 19.7511 18.6521 18.2998 18.6521C16.8484 18.6521 15.6719 17.4756 15.6719 16.0242V6.94608C15.6719 5.49474 16.8484 4.3182 18.2998 4.3182C19.7511 4.3182 20.9276 5.49474 20.9276 6.94608V16.0242Z" {...pathProps(0.1, '#007FFE')} />
       {/* Main body — white */}
