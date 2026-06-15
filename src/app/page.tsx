@@ -344,8 +344,11 @@ export default function AtlasPage() {
                 const op = allOps.find(o => o.id === opportunityId)
                 if (op) {
                   setActiveOp(op)
-                  setAllocationAmount(amount)
-                  setShowAllocation(true)
+                  setShowAllocation(false)
+                  setTimeout(() => {
+                    setAllocationAmount(amount)
+                    setShowAllocation(true)
+                  }, 0)
                 }
               }}
             />
