@@ -342,6 +342,8 @@ export default function AtlasPage() {
               onAllocate={({ opportunityId, amount }) => {
                 const allOps = DISTRICTS.flatMap(d => d.opportunities)
                 const op = allOps.find(o => o.id === opportunityId)
+                  ?? allOps.find(o => opportunityId.includes(o.id) || o.id.includes(opportunityId))
+                  ?? allOps.find(o => o.id === 'usdy')
                 if (op) {
                   setActiveOp(op)
                   setShowAllocation(false)
