@@ -109,6 +109,27 @@ export default function AtlasPage() {
   const { snapshots, saveSnapshot } = usePortfolioHistory(address)
   const { checkAndMint, newAchievement, clearNew } = useAchievements(address)
 
+  // Restore persisted goal + allocation history for this wallet
+  useEffect(() => {
+    if (!address) return
+    try {
+      const saved = JSON.parse(localStorage.getItem(`atlas-${address}`) || '{}')
+      if (saved.goal) setUserGoal(saved.goal)
+      if (saved.history?.length) setAllocationHistory(saved.history)
+    } catch { /* ignore */ }
+  }, [address])
+
+  // Save goal + allocation history whenever they change
+  useEffect(() => {
+    if (!address) return
+    const data: Record<string, unknown> = {}
+    if (userGoal) data.goal = userGoal
+    if (allocationHistory.length) data.history = allocationHistory
+    if (Object.keys(data).length) {
+      localStorage.setItem(`atlas-${address}`, JSON.stringify(data))
+    }
+  }, [address, userGoal, allocationHistory])
+
   // Fire notification when achievement is earned
   useEffect(() => {
     if (newAchievement) {
@@ -143,11 +164,18 @@ export default function AtlasPage() {
 
   const { disconnect } = useDisconnect()
 
-  // When wallet connects, run the scan sequence
-  // Auto-scan if the user has entered (including on refresh with session restore)
+  // When wallet connects, run scan or restore silently
   useEffect(() => {
     if (isConnected && address && !portfolio && phase !== 'landing') {
-      runScanSequence()
+      const saved = localStorage.getItem(`atlas-${address}`)
+      if (saved && sessionStorage.getItem('atlas-entered')) {
+        // Returning user on refresh — skip scan, go straight to island
+        setPhase('island')
+        const realPortfolio = walletPortfolioRef.current
+        if (realPortfolio) setPortfolio(realPortfolio)
+      } else {
+        runScanSequence()
+      }
     }
   }, [isConnected, address, phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
