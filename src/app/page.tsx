@@ -49,7 +49,10 @@ const SCAN_STEPS = [
 ]
 
 export default function AtlasPage() {
-  const [phase, setPhase] = useState<Phase>('landing')
+  const [phase, setPhase] = useState<Phase>(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('atlas-entered')) return 'exploring'
+    return 'landing'
+  })
   const [showLogoReturn, setShowLogoReturn] = useState(false)
   const { enabled: audioEnabled, toggle: toggleAudio } = useAmbientAudio()
   const [activeDistrict, setActiveDistrict] = useState<District | null>(null)
@@ -141,7 +144,7 @@ export default function AtlasPage() {
   const { disconnect } = useDisconnect()
 
   // When wallet connects, run the scan sequence
-  // Only auto-scan if the user has already left the landing page
+  // Auto-scan if the user has entered (including on refresh with session restore)
   useEffect(() => {
     if (isConnected && address && !portfolio && phase !== 'landing') {
       runScanSequence()
@@ -161,6 +164,7 @@ export default function AtlasPage() {
     if (!isConnected && portfolio) {
       setPortfolio(null)
       setPhase('landing')
+      sessionStorage.removeItem('atlas-entered')
       setActiveDistrict(null)
       setSelectedOp(null)
       setActiveOp(null)
@@ -195,7 +199,7 @@ export default function AtlasPage() {
   const handleExplore = useCallback(() => {
     history.pushState({ phase: 'exploring' }, '')
     setPhase('exploring')
-    // Welcome message — wonder first, no wallet pressure
+    sessionStorage.setItem('atlas-entered', '1')
     setNav('Welcome to Atlas. Wealth has never had a map. Explore where your capital can go.')
   }, [])
 
