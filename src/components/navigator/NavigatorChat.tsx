@@ -372,3 +372,4 @@ export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAle
     </>
   )
 }
+// cache bust 1781554032
