@@ -31,15 +31,21 @@ const SUGGESTIONS = [
   'How do I improve my health score?',
 ]
 
-// Parse [ACTION:allocate:opportunityId:amount] from assistant message
+// Parse action from assistant message — supports both legacy [ACTION:...] and server-side <!--ACTION:...--> formats
 function parseAction(content: string): AllocateAction | null {
-  const match = content.match(/\[ACTION:allocate:([\w-]+):(\d+(?:\.\d+)?)\]/)
-  if (!match) return null
-  return { opportunityId: match[1], amount: parseFloat(match[2]) }
+  const legacy = content.match(/\[ACTION:allocate:([\w-]+):(\d+(?:\.\d+)?)\]/)
+  if (legacy) return { opportunityId: legacy[1], amount: parseFloat(legacy[2]) }
+  const server = content.match(/<!--ACTION:([\w-]+):(\d+(?:\.\d+)?)-->/)
+  if (server) return { opportunityId: server[1], amount: parseFloat(server[2]) }
+  return null
 }
 
 function stripAction(content: string): string {
-  return content.replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '').replace(/\[ACTION:allocate[^\]]*$/g, '').trim()
+  return content
+    .replace(/\[ACTION:allocate:[\w-]+:\d+(?:\.\d+)?\]/g, '')
+    .replace(/\[ACTION:allocate[^\]]*$/g, '')
+    .replace(/<!--ACTION:[\w-]+:\d+(?:\.\d+)?-->/g, '')
+    .trim()
 }
 
 export function NavigatorChat({ portfolio, visible, wallet, onAllocate, agentAlertCount = 0 }: Props) {
