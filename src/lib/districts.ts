@@ -6,7 +6,7 @@ export const DISTRICTS: District[] = [
     id: 'income',
     name: 'Income District',
     color: '#34D186',
-    position: [-4, 0, -2],
+    position: [0, 0, -5],
     description: 'Treasury-backed yield. Stable passive income.',
     opportunities: [
       {
@@ -51,7 +51,7 @@ export const DISTRICTS: District[] = [
     id: 'staking',
     name: 'Staking District',
     color: '#3B82F6',
-    position: [4, 0, -2],
+    position: [4.33, 0, -2.5],
     description: 'ETH liquid staking and validator yield.',
     opportunities: [
       {
@@ -84,7 +84,7 @@ export const DISTRICTS: District[] = [
     id: 'growth',
     name: 'Growth District',
     color: '#A855F7',
-    position: [0, 0, 4],
+    position: [4.33, 0, 2.5],
     description: 'Ecosystem growth. Higher yield, accepts more volatility.',
     opportunities: [
       {
@@ -129,7 +129,7 @@ export const DISTRICTS: District[] = [
     id: 'treasury',
     name: 'Treasury District',
     color: '#F59E0B',
-    position: [-4, 0, 3],
+    position: [0, 0, 5],
     description: 'Institutional-grade capital. Long-term preservation with institutional backing.',
     opportunities: [
       {
@@ -162,7 +162,7 @@ export const DISTRICTS: District[] = [
     id: 'emerging',
     name: 'Emerging District',
     color: '#F97316',
-    position: [4, 0, 3],
+    position: [-4.33, 0, 2.5],
     description: 'New protocols. Early-stage yield. Higher upside, higher risk.',
     opportunities: [
       {
@@ -207,7 +207,7 @@ export const DISTRICTS: District[] = [
     id: 'safety',
     name: 'Safety District',
     color: '#06B6D4',
-    position: [0, 0, -5],
+    position: [-4.33, 0, -2.5],
     description: 'Capital preservation first. Ultra-low risk. Sleep well.',
     opportunities: [
       {

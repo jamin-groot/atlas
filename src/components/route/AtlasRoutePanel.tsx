@@ -30,14 +30,36 @@ interface Props {
 
 export function AtlasRoutePanel({ activeRoute, routes, onSelectRoute, onAccept, onDismiss, visible, goal, goalProgress }: Props) {
   const [copied, setCopied] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const color = activeRoute ? (DISTRICT_COLORS[activeRoute.to.district] ?? '#34D186') : '#34D186'
 
-  function handleShare() {
+  async function handleCopyLink() {
     if (!activeRoute) return
     const url = buildShareUrl(activeRoute)
-    navigator.clipboard.writeText(url)
+    try {
+      await navigator.clipboard.writeText(url)
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = url
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
     setCopied(true)
+    setShareOpen(false)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function handleShareTwitter() {
+    if (!activeRoute) return
+    const url = buildShareUrl(activeRoute)
+    const mo = activeRoute.projectedMonthlyIncome.toFixed(0)
+    const text = `Just mapped a route on Atlas → +$${mo}/month into the ${activeRoute.to.label}.\n\nHealth +${activeRoute.healthDelta}. AI-guided, on-chain verified.\n\n`
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank')
+    setShareOpen(false)
   }
 
   return (
@@ -183,12 +205,37 @@ export function AtlasRoutePanel({ activeRoute, routes, onSelectRoute, onAccept, 
                     >
                       Dismiss
                     </button>
-                    <button
-                      onClick={handleShare}
-                      className="py-2 px-3 rounded-xl border border-white/10 text-xs font-mono text-white/40 hover:text-white/65 hover:border-white/20 transition-all"
-                    >
-                      {copied ? '✓ Copied' : '↗ Share'}
-                    </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShareOpen(!shareOpen)}
+                        className="py-2 px-3 rounded-xl border border-white/10 text-xs font-mono text-white/40 hover:text-white/65 hover:border-white/20 transition-all"
+                      >
+                        {copied ? '✓ Copied' : '↗ Share'}
+                      </button>
+                      <AnimatePresence>
+                        {shareOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                            className="absolute bottom-full mb-2 left-0 bg-[#0a0f1a]/80 backdrop-blur-xl border border-white/10 rounded-xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.5)] min-w-[160px]"
+                          >
+                            <button
+                              onClick={handleShareTwitter}
+                              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[11px] font-mono text-white/60 hover:text-white hover:bg-white/5 transition-all text-left"
+                            >
+                              <span className="text-[#1DA1F2]">𝕏</span> Post on X
+                            </button>
+                            <button
+                              onClick={handleCopyLink}
+                              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-[11px] font-mono text-white/60 hover:text-white hover:bg-white/5 transition-all text-left border-t border-white/5"
+                            >
+                              <span className="text-white/40">🔗</span> Copy link
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                     <button
                       onClick={() => onAccept(activeRoute)}
                       className="flex-1 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all"

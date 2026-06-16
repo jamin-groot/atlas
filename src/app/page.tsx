@@ -30,6 +30,7 @@ import { MOCK_PORTFOLIO } from '@/lib/mockPortfolio'
 import { DISTRICTS } from '@/lib/districts'
 import { MarketingLanding } from '@/components/landing/MarketingLanding'
 import { AudioToggle } from '@/components/world/AudioToggle'
+import { MarketNews } from '@/components/market/MarketNews'
 import { useAmbientAudio } from '@/hooks/useAmbientAudio'
 import { useAgentAlerts } from '@/hooks/useAgentAlerts'
 import * as THREE from 'three'
@@ -66,6 +67,9 @@ export default function AtlasPage() {
   const [allocationAmount, setAllocationAmount] = useState(500)
   const navigatorRef = useRef<NavigatorChatHandle>(null)
   const navigatorInitiated = useRef<{ opportunityId: string; amount: number } | null>(null)
+  const prevHealthRef = useRef<number | null>(null)
+  const prevGoalProgressRef = useRef<number | null>(null)
+  const goalMilestonesHit = useRef<Set<number>>(new Set())
   const [showEvolution, setShowEvolution] = useState(false)
   const [allocationHistory, setAllocationHistory] = useState<{ opportunity: Opportunity; amount: number; date: string }[]>([])
   const [activeRoute, setActiveRoute] = useState<AtlasRoute | null>(null)
@@ -186,6 +190,79 @@ export default function AtlasPage() {
       setPortfolio(walletPortfolio)
     }
   }, [walletPortfolio]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Health score change notifications
+  useEffect(() => {
+    if (!portfolio) return
+    const current = portfolio.healthScore
+    const prev = prevHealthRef.current
+    if (prev !== null && prev !== current) {
+      if (current < 40 && prev >= 40) {
+        pushNotif('health', 'Health score dropping', `Your portfolio health fell to ${current}. Consider diversifying across more districts.`, {
+          label: 'Ask Navigator',
+          onClick: () => navigatorRef.current?.sendMessage('My health score just dropped. What should I do to improve it?'),
+        })
+      } else if (current >= 80 && prev < 80) {
+        pushNotif('health', 'Strong portfolio health', `Health score reached ${current}. Your diversification is paying off.`)
+      }
+    }
+    prevHealthRef.current = current
+  }, [portfolio?.healthScore]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Goal progress milestone notifications
+  useEffect(() => {
+    if (!portfolio || !userGoal) return
+    const gp = goalProgress(portfolio, userGoal)
+    const prev = prevGoalProgressRef.current
+    const milestones = [25, 50, 75, 100]
+    for (const m of milestones) {
+      if (gp >= m && (prev === null || prev < m) && !goalMilestonesHit.current.has(m)) {
+        goalMilestonesHit.current.add(m)
+        if (m === 100) {
+          pushNotif('achievement', 'Goal complete!', `You've reached your "${userGoal.label}" goal. Time to set a new destination.`, {
+            label: 'Set new goal',
+            onClick: () => setShowGoalModal(true),
+          })
+        } else {
+          pushNotif('navigator', `${m}% to your goal`, `You're ${m}% of the way to "${userGoal.label}". Keep building.`)
+        }
+      }
+    }
+    prevGoalProgressRef.current = gp
+  }, [portfolio, userGoal]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Idle capital notification
+  useEffect(() => {
+    if (!portfolio || portfolio.healthScore > 20) return
+    const idle = portfolio.totalValue - (portfolio.positions?.reduce((s, p) => s + p.currentValue, 0) ?? 0)
+    if (idle > 50) {
+      pushNotif('navigator', 'Idle capital detected', `$${idle.toFixed(0)} sitting idle earning 0%. Navigator has suggestions.`, {
+        label: 'Ask Navigator',
+        onClick: () => navigatorRef.current?.sendMessage('I have idle capital. What\'s the best move right now?'),
+      })
+    }
+  }, [portfolio?.healthScore]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Market news notification on portfolio load
+  const marketNewsNotified = useRef(false)
+  useEffect(() => {
+    if (!portfolio || marketNewsNotified.current) return
+    marketNewsNotified.current = true
+    fetch('/api/news').then(r => r.json()).then(({ articles }) => {
+      const actionable = articles?.filter((a: { actionable: boolean; district?: string }) => a.actionable && a.district)
+      if (actionable?.length) {
+        const top = actionable[0]
+        pushNotif('alert', 'Market update', top.title, {
+          label: 'Read more',
+          onClick: () => {
+            navigatorRef.current?.sendMessage(
+              `I just read this news: "${top.title}" — ${top.summary}. How does this affect my portfolio and what should I do?`
+            )
+          },
+        })
+      }
+    }).catch(() => {})
+  }, [portfolio]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset all state when wallet disconnects
   useEffect(() => {
@@ -391,6 +468,49 @@ export default function AtlasPage() {
               }}
             />
             <AudioToggle enabled={audioEnabled} onToggle={toggleAudio} />
+            {portfolio && (
+              <>
+                <button
+                  onClick={() => setShowEvolution(true)}
+                  className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
+                >
+                  Evolution
+                </button>
+                <MarketNews
+                  onAskNavigator={(prompt) => {
+                    navigatorRef.current?.sendMessage(prompt)
+                  }}
+                />
+                {userGoal && portfolio ? (() => {
+                  const gp = goalProgress(portfolio, userGoal)
+                  return (
+                    <button
+                      onClick={() => setShowGoalModal(true)}
+                      className="flex items-center gap-2.5 border rounded-full px-3 py-1.5 transition-all hover:border-[#34D186]/40 group"
+                      style={{ borderColor: 'rgba(52,209,134,0.2)', background: 'rgba(52,209,134,0.04)' }}
+                    >
+                      <div className="relative w-4 h-4 flex-shrink-0">
+                        <svg width="16" height="16" viewBox="0 0 16 16" className="-rotate-90">
+                          <circle cx="8" cy="8" r="6" fill="none" stroke="rgba(52,209,134,0.15)" strokeWidth="2" />
+                          <circle cx="8" cy="8" r="6" fill="none" stroke="#34D186" strokeWidth="2"
+                            strokeDasharray={`${(gp / 100) * 37.7} 37.7`}
+                            strokeLinecap="round" />
+                        </svg>
+                      </div>
+                      <span className="text-[10px] font-mono text-[#34D186]">{gp}%</span>
+                      <span className="text-[10px] font-mono text-white/35 max-w-[100px] truncate">{userGoal.label}</span>
+                    </button>
+                  )
+                })() : (
+                  <button
+                    onClick={() => setShowGoalModal(true)}
+                    className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
+                  >
+                    Set goal
+                  </button>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -412,42 +532,6 @@ export default function AtlasPage() {
                 onMarkAllRead={markAllRead}
                 onClear={clearNotifs}
               />
-              <button
-                onClick={() => setShowEvolution(true)}
-                className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
-              >
-                Evolution
-              </button>
-              {/* Goal progress tracker */}
-              {userGoal && portfolio ? (() => {
-                const gp = goalProgress(portfolio, userGoal)
-                return (
-                  <button
-                    onClick={() => setShowGoalModal(true)}
-                    className="flex items-center gap-2.5 border rounded-full px-3 py-1.5 transition-all hover:border-[#34D186]/40 group"
-                    style={{ borderColor: 'rgba(52,209,134,0.2)', background: 'rgba(52,209,134,0.04)' }}
-                  >
-                    {/* Mini arc progress */}
-                    <div className="relative w-4 h-4 flex-shrink-0">
-                      <svg width="16" height="16" viewBox="0 0 16 16" className="-rotate-90">
-                        <circle cx="8" cy="8" r="6" fill="none" stroke="rgba(52,209,134,0.15)" strokeWidth="2" />
-                        <circle cx="8" cy="8" r="6" fill="none" stroke="#34D186" strokeWidth="2"
-                          strokeDasharray={`${(gp / 100) * 37.7} 37.7`}
-                          strokeLinecap="round" />
-                      </svg>
-                    </div>
-                    <span className="text-[10px] font-mono text-[#34D186]">{gp}%</span>
-                    <span className="text-[10px] font-mono text-white/35 max-w-[100px] truncate">{userGoal.label}</span>
-                  </button>
-                )
-              })() : (
-                <button
-                  onClick={() => setShowGoalModal(true)}
-                  className="text-xs font-mono text-white/40 border border-white/8 rounded-full px-3 py-1.5 hover:text-white/70 hover:border-white/20 transition-all"
-                >
-                  Set goal
-                </button>
-              )}
               <button
                 onClick={() => {
                   if (!userGoal) { setShowGoalModal(true); return }

@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { Stars } from '@react-three/drei'
+import { SpaceEnvironment } from './SpaceEnvironment'
 import { DistrictIsland } from './DistrictIsland'
 import { AtmosphereParticles } from './AtmosphereParticles'
 import { CameraController } from './CameraController'
@@ -94,7 +94,7 @@ export function AtlasWorldScene({
       <pointLight position={[ 0, 5, -6]}   intensity={0.5} color="#06B6D4" distance={12} decay={2} />
 
       <Suspense fallback={null}>
-        <Stars radius={100} depth={60} count={5000} factor={4} saturation={0.1} fade speed={0.25} />
+        <SpaceEnvironment />
         <AtmosphereParticles />
 
         {/* Separate floating district islands */}
