@@ -116,7 +116,7 @@ export async function POST(req: Request) {
   let portfolioBlock = ''
   if (portfolioContext) {
     const { totalValue, healthScore, monthlyIncome, allocation, positions } = portfolioContext
-    const unallocated = allocation?.find((a: { district: string }) => a.district === 'growth')?.value ?? 0
+    const unallocated = allocation?.find((a: { district: string }) => a.district === 'unallocated')?.value ?? 0
     const invested = totalValue - unallocated
 
     portfolioBlock = `\n\n## User's Live Portfolio

@@ -103,9 +103,8 @@ export function useWalletPortfolio(
     // Build allocation breakdown by district
     const districtMap: Record<string, { usd: number }> = {}
 
-    // Unallocated MNT sits in "growth"
     if (walletUsd > 0) {
-      districtMap['growth'] = { usd: walletUsd }
+      districtMap['unallocated'] = { usd: walletUsd }
     }
 
     positions.forEach(p => {

@@ -17,6 +17,7 @@ interface Props {
 const DISTRICT_LABELS: Record<string, string> = {
   income: 'Income', staking: 'Staking', growth: 'Growth',
   treasury: 'Treasury', emerging: 'Emerging', safety: 'Safety',
+  unallocated: 'Unallocated',
 }
 
 const OP_LABELS: Record<string, string> = {
@@ -186,7 +187,7 @@ export function UserIslandPanel({ portfolio, visible, onClose }: Props) {
                     <p className="text-[10px] font-mono text-[#34D186] uppercase tracking-widest mb-1">Atlas Navigator</p>
                     <p className="text-xs text-white/70 leading-relaxed">
                       {(() => {
-                        const unallocated = portfolio.allocation.find(a => a.district === 'growth')?.value ?? 0
+                        const unallocated = portfolio.allocation.find(a => a.district === 'unallocated')?.value ?? 0
                         const hasPositions = portfolio.positions.length > 0
                         if (!hasPositions && unallocated > 0) {
                           const income = ((unallocated * 0.5 * 5.1) / 100 / 12).toFixed(2)

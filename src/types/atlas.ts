@@ -1,4 +1,4 @@
-export type DistrictType = 'income' | 'staking' | 'growth' | 'treasury' | 'emerging' | 'safety'
+export type DistrictType = 'income' | 'staking' | 'growth' | 'treasury' | 'emerging' | 'safety' | 'unallocated'
 
 export interface District {
   id: DistrictType

@@ -5,7 +5,7 @@ export function generateRoutes(
   liveAPY: Record<string, number>,
   goal?: UserGoal | null,
 ): AtlasRoute[] {
-  const unallocated = portfolio.allocation.find(a => a.district === 'growth')?.value ?? 0
+  const unallocated = portfolio.allocation.find(a => a.district === 'unallocated')?.value ?? 0
   const totalValue  = portfolio.totalValue
   const currentMonthly = portfolio.positions.reduce((s, p) => s + p.income, 0)
 

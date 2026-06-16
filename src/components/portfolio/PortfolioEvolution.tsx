@@ -77,11 +77,12 @@ export function PortfolioEvolution({ portfolio, allocations, snapshots, nextRout
   const totalYieldEarned = portfolio?.positions.reduce((s, p) => s + (p.yieldEarned ?? 0), 0) ?? 0
   const totalValue = portfolio?.totalValue ?? 0
 
-  // P&L: total invested = sum of allocation events
-  const totalInvested = useMemo(
-    () => allocations.reduce((s, a) => s + a.amount, 0),
-    [allocations]
-  )
+  // P&L: total invested = sum of allocation events, fallback to actual positions
+  const totalInvested = useMemo(() => {
+    const fromAllocations = allocations.reduce((s, a) => s + a.amount, 0)
+    if (fromAllocations > 0) return fromAllocations
+    return portfolio?.positions.reduce((s, p) => s + p.currentValue, 0) ?? 0
+  }, [allocations, portfolio?.positions])
   const pnlUsd = totalYieldEarned
   const pnlPct = totalInvested > 0 ? (pnlUsd / totalInvested) * 100 : 0
 

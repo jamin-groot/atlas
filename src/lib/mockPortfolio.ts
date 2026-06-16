@@ -22,4 +22,5 @@ export const DISTRICT_COLORS: Record<string, string> = {
   treasury: '#F59E0B',
   emerging: '#F97316',
   safety:   '#06B6D4',
+  unallocated: '#555555',
 }
